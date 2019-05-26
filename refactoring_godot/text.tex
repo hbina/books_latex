@@ -1,0 +1,33 @@
+\documentclass[a4paper,10pt]{book}
+\usepackage[utf8]{inputenc}
+
+\title{Refactoring Godot}
+\author{Hanif Bin Ariffin}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\newpage
+\section{Migrating to the Standard Library}
+
+\subsection{Deleting UString From the Project}
+
+Upon deleting "core/ustring.h" you will encounter \textit{massive} amount of errors.
+As expected, many, many files depend on this particular data structure.
+
+\newpage
+\section{Using Modern C++}
+
+Use C++xx tools (lambdas, constexpr, \dots)
+
+\newpage
+\section{Replacing Class Hierarchies with Templates}
+
+Remove class hierarchies ==> use templates instead.
+\subsection{Template Specialization}
+
+Read about template specialization.
+
+\end{document}
