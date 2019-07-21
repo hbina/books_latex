@@ -1,0 +1,96 @@
+\documentclass[a4paper,12pt]{book}
+\usepackage[utf8]{inputenc}
+
+\author{Hanif Bin Ariffin}
+\title{Notes on Game Engine Architecture}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+% TODO : Divide chapters in this book by the chapter in the book.
+
+\section{Introduction}
+
+This book serves as a personal note as I read \textit{Game Engine Architecture 3rd Edition} by Jason Gregory.
+It will mostly contain keywords and concepts that I did not fully understood.
+The goal is to layout what I think of the problem and try to figure it out as I am writing.
+The book will obviously contain flaws and misunderstanding so it shouldn't serve as a reference as any kind.
+I will not be responsible for any bugs :).
+
+
+\section{Problems with Ogre 3D Engine}
+
+I could not, for the life of me, compile Ogre from the source in Linux nor Windows.
+The author (of the book) mentioned that he will guide us through some parts of its code.
+This will definitely come as a problem in the future as I cannot test changes to figure out how things work.
+
+I do have some experience with Godot.
+Perhaps I can use that as a reference instead.
+We will see how it develops.
+
+\section{The Difference Between Analytical and Numerical Models}
+
+-- Explain how mathematical models are required to allow computation -- since computers don't understand words.
+-- Explain how there are two ways to describe a given system mathematically.
+
+\subsection{Analytical Model}
+
+-- The most accurate model but very hard to realize in hardware.
+
+\subsection{Numerical Model}
+
+-- Not the most accurate model but relatively easy to implement in hardware.
+-- Will require infinite iteration to come to actual result.
+-- But we are interested in pure accuracy.
+-- We also care about consistency and practicality, of course.
+
+\section{What is Binary Space Partitioning Trees and Portal-Based Rendering Systems}
+
+-- I have no idea what any of these are.
+
+
+\subsection{Binary Space Partitioning Trees}
+
+-- Wiki or Slack this stuff
+
+\subsection{Portal-Based Rendering Rendering Systems}
+
+-- Wiki or Slack this stuff
+
+\section{The Quake II Source Code!}
+
+The source code for the famous Quake II is freely available online!
+
+-- Take a look and explain here?
+
+\section{The Unreal Engine Source Code!}
+
+The source code for Unreal Engine 4 is also freely available online!
+
+-- Take a look and explain them here?
+
+\section{What is the Windows Messaging System}
+
+--- Google what is Windows Messaging system?
+
+\section{Terminologies in 3D Rendering}
+
+\subsection{Geometric Primitives}
+
+Otherwise known as \textit{render packets}.
+
+\subsection{Meshes}
+
+\subsection{Vertex}
+
+\subsection{Line Lists}
+
+\subsection{Point Lists}
+
+\subsection{Particles}
+
+\subsection{Terrain Patches}
+
+\end{document}
