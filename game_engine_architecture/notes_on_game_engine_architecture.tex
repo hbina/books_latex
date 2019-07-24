@@ -1,5 +1,6 @@
 \documentclass[a4paper,12pt]{book}
 \usepackage[utf8]{inputenc}
+\usepackage{listings}
 
 \author{Hanif Bin Ariffin}
 \title{Notes on Game Engine Architecture}
@@ -19,8 +20,9 @@ The goal is to layout what I think of the problem and try to figure it out as I 
 The book will obviously contain flaws and misunderstanding so it shouldn't serve as a reference as any kind.
 I will not be responsible for any bugs :).
 
-
-\section{Problems with Ogre 3D Engine}
+\newpage
+\section{Chapter 1}
+\subsection{Problems with Ogre 3D Engine}
 
 I could not, for the life of me, compile Ogre from the source in Linux nor Windows.
 The author (of the book) mentioned that he will guide us through some parts of its code.
@@ -30,7 +32,7 @@ I do have some experience with Godot.
 Perhaps I can use that as a reference instead.
 We will see how it develops.
 
-\section{The Difference Between Analytical and Numerical Models}
+\subsection{The Difference Between Analytical and Numerical Models}
 
 -- Explain how mathematical models are required to allow computation -- since computers don't understand words.
 -- Explain how there are two ways to describe a given system mathematically.
@@ -46,7 +48,7 @@ We will see how it develops.
 -- But we are interested in pure accuracy.
 -- We also care about consistency and practicality, of course.
 
-\section{What is Binary Space Partitioning Trees and Portal-Based Rendering Systems}
+\subsection{What is Binary Space Partitioning Trees and Portal-Based Rendering Systems}
 
 -- I have no idea what any of these are.
 
@@ -59,38 +61,89 @@ We will see how it develops.
 
 -- Wiki or Slack this stuff
 
-\section{The Quake II Source Code!}
+\subsection{The Quake II Source Code!}
 
 The source code for the famous Quake II is freely available online!
 
 -- Take a look and explain here?
 
-\section{The Unreal Engine Source Code!}
+\subsection{The Unreal Engine Source Code!}
 
 The source code for Unreal Engine 4 is also freely available online!
 
 -- Take a look and explain them here?
 
-\section{What is the Windows Messaging System}
+\subsection{What is the Windows Messaging System}
 
 --- Google what is Windows Messaging system?
 
-\section{Terminologies in 3D Rendering}
+\subsection{Terminologies in 3D Rendering}
 
-\subsection{Geometric Primitives}
+\subsubsection{Geometric Primitives}
 
-Otherwise known as \textit{render packets}.
+Otherwise known as \texttt{render packets}.
 
-\subsection{Meshes}
+\subsubsection{Meshes}
 
-\subsection{Vertex}
+Otherwise known as 3D models.
+It is a set of triangles and vertices forming a complex shape.
+A mesh is just a blank shape.
+It does not contain any information whether its opaque, transparent, shiny, reflective, dark, etc etc.
+Thus, it is usually augmented with \texttt{materials}.
 
-\subsection{Line Lists}
+\subsubsection{Brush Geometry}
 
-\subsection{Point Lists}
+\subsubsection{Vertex}
 
-\subsection{Particles}
+\subsubsection{Line Lists}
 
-\subsection{Terrain Patches}
+\subsubsection{Point Lists}
+
+\subsubsection{Particles}
+
+\subsubsection{Terrain Patches}
+
+
+\section{Chapter 2}
+
+I frankly have no interest in Chapter 2.
+I am not planning on using Windows :).
+
+Perhaps the only interesting thing in this chapter is \texttt{Valgrind}.
+Its quite a handy tool to profile memory leaks.
+I often run them as follows :
+
+\begin{lstlisting}
+    valgrind --leak-check=full <program> <program-args>
+\end{lstlisting}
+
+Other than that, just skip the chapter.
+Unless you are new or need a refresher on \texttt{Git} or are using Visual Studio.
+
+\section{Chapter 3}
+
+This is mostly a review of C++.
+In particular, the author talks a lot about hierarchies and memory layout.
+While important, I feel like these stuffs are better covered elsewhere as its own topic.
+
+\section{Chapter 4}
+
+This chapter talks about concurrency programming.
+The author describes a variety of parallelism techniques that are available through the kernel (Linux and Windows) and through C++ (from std::thread).
+Naturally, the author also discuss problems with parallelism and ways to mitigate read-and-write problems.
+
+Again, albeit very important considering todays hardware, not particularly interesting for me.
+
+\section{Chapter 5}
+
+A game is a mathematical model of a virtual world simulated in real time on a computer of some kind.
+Therefore, mathematics pervades everything we do in the game industry.
+Game programmers make use of virtually all branches of mathematics, from trigonometry to algebra to statistics to calculus.
+However, by far the most prevalent kind of mathematics you'll be doing as a game programmer is 3D vector and matrix math.
+
+-- TODO
+
+: Write about vector algebra?
+: Lots of stuff to write about AABB's and family.
 
 \end{document}
