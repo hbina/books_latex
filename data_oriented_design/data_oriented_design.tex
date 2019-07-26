@@ -1,4 +1,5 @@
-\documentclass[a4paper,10pt]{book}
+\documentclass[a4paper,12pt]{book}
+\usepackage[a4paper, total={6in, 6in}]{geometry}
 \usepackage[utf8]{inputenc}
 
 \author{Hanif Bin Ariffin rewrites}
@@ -106,15 +107,320 @@ An instance for each rather than a variable storing the number of items.
 For some games this is an optimization, as creation and destruction of objects is a costly acitivty, but the trend is worrying, as these ways of stroing information about the world make the world impenetrable to simple interogation.
 
 Many games seem to try to keep everything about the player in the player class.
+If the player dies in-game, they have to hang around as dead object, otherwise, the lose access to their achievement data.
+This linking of what the data is, to where it resides and what it shares lifetime with, causes monotlithic classes and hard to untangle relationships which frequenctly turn out to be the cause of bugs.
+I will not name any of the games, but it's not just one title, nor just one studio, but an epidemic of poor technical design that seems to infect those who use off the shelf object-oriented engines more than those who develop their own regardless of paradigm.
+
+\subsubsection{Summary}
+
+There is no casual/easy mapping that can be made between real world objects and implementation details that programmers and computers have to deal with.
+Concepts like bananas, gorillas, forests and the sort cannot be categorized easily.
+Even if they can be, computations on them are not easily done by computers.
+If you ever look at commercial code that utilize object-oriented paradigm, they can easily be bloated by multiple internal variables and functions that operate on 1 or more of these variables.
+These will inevitably lead to states, and states make debugging and intention very hard to internalize.
+
+One might argue that that is simply a case of \textit{poorly designed} structures and that is exactly the point.
+Object-oriented programming allures programmers to think in a way that is not scalable and maintainable over time.
+The object might have been obvious for the first 6 months of development.
+However, after adding functions on top of functions in a single object, the object becomes an abomination.
+
+Every functions and member variables added to a class will add a combinatorial amount of states to the object instance.
+Consider debugging a segmentation fault (SEGFAULT) problem.
+You have traced this SEGFAULT to a single pointer that have been deleted.
+A simple solution would have been to check if this variable is null before proceeding to operate on it.
+This is a perfectly acceptable solution for many, albeit it adds branching to your operation.
+
+There is a bigger issue here however : there are states in your object, such that it is possible for \textit{someone} to perform an operation on a null pointer.
+Thus, there are some cluster of states in your object that is malicious.
+
+Even worse, it is possible that the pointer is not null, but the object it points to have been freed by memory.
+This is even worse, because you want to operate on an object, but \textit{someone} else deleted your object!
 
 \subsection{Data And Statistics}
+
+The second principle: Data is the type, frequency, quantity, shape, and probability.
+
+The second statement is that data is not just the structure.
+A common misconception about data-oriented design is that it's all about cache misses.
+Even if it was all about making sure you never missed the cache, and it was all about structuring your classes so the hot and cold data was split apart, it would be a generally useful addition to your programming toolkit, but data-oriented design is about all aspects of the data.
+To write a book on how to avoid cache misses, you need more than just some tips on how to organise your structures, you need a grounding in what is really happening inside your computer when it is running your program.
+Teaching that in a book is also impossible as it would only apply to one generation of hardware, and one generation of programming languages, however, data-oriented design is not rooted in just one language and just some unusual hardware, even though the language to best benefit from it is C++, and the hardware to benefit the approach the most is anything with unbalanced bottlenecks.
+The schema of the data is important, but the values and how the data is transformed are as important, if not more so.
+It is not enough to have some photographs of a cheetah to determine how fast it can run.
+You need to see it in the wild and understand the true costs of being slow.
+
+The data-oriented design model is centered around data.
+It pivots on live data, real data, data that is also information.
+Object-oriented design is centred around the problem definition.
+Objects are not real things but abstract representations of the context in which the problem will be solved.
+The objects manipulate the data needed to represent them without any consideration for the hardware or the real-world data patterns or quantities.
+This is why object-oriented design allows you to quickly build up first versions of applications, allowing you to put the first version of the design document or problem definition directly into the code, and make a quick attempt at a solution.
+
+Data-oriented design takes a different approach to the problem, instead of assuming we know nothing about the hardware, it assumes we know little about the true nature of our problem, and makes the schema of the data a second-class citizen.
+Anyone who has written a sizeable piece of software may recognise that the technical structure and the design for a project often changes so much that there is barely any section from the first draft remaining unchanged in the final implementation.
+Data-oriented design avoids wasting resources by never assuming the design needs to exist anywhere other than in a document.
+It makes progress by providing a solution to the current problem through some high-level code controlling sequences of events and specifying schema in which to give temporary meaning to the data.
+
+Data-oriented design takes its cues from the data which is seen or expected.
+Instead of planning for all eventualities, or planning to make things adaptable, there is a preference for using the most probable input to direct the choice of algorithm.
+Instead of planning to be extendable, it plans to be simple and replaceable, and get the job done.
+Extendable can be added later, with the safety net of unit tests to ensure it remains working as it did while it was simple.
+Luckily, there is a way to make your data layout extendable without requiring much thought, by utilising techniques developed many years ago for working with databases.
+
+Database technology took a great turn for the positive when the relational model was introduced.
+In the paper \textit{Out of the Tar Pit}, Functional Relational Programming takes it a step further when it references the idea of using relational model data-structures with functional transforms.
+These are well defined, and much literature on how to adapt their form to match your requirements is available.
+
 \subsection{Data Can Change}
+
+Data-oriented design is current.
+It is not a representation of the history of a problem or a solution that has been brought up to date, nor is it the future, with generic solutions made up to handle whatever will come along.
+Holding onto the past will interfere with flexibility, and looking to the future is generally fruitless as programmers are not fortune tellers.
+It's the opinion of the author, that future-proof systems rarely are.
+Object-oriented design starts to show its weaknesses when designs change in the real-world.
+
+Object-oriented design is known to handle changes to underlying implementation details very well, as these are the expected changes, the obvious changes, and the ones often cited in introductions to object-oriented design.
+However, real world changes such as change of user's needs, changes to input format, quantity, frequency, and the route by which the information will travel, are not handled with grace.
+It was introduced in \textit{On the Criteria To Be Used in Decomposing Systems into Modules} that the modularisation approach used by many at the time was rather like that of a production line, where elements of the implementation are caught up in the stages of the proposed solution.
+These stages themselves would be identified with a current interpretation of the problem.
+In the original document, the solution was to introduce a data hiding approach to modularisation, and though it was an improvement, in the later book \textit{Software Pioneers: Contributions to Software Engineering}, D. L. Parnas revisits the issue and reminds us that even though initial software development can be faster when making structural decisions based on business facts, it lays a burden on maintenance and evolutionary development.
+Object-oriented design approaches suffer from this inertia inherent in keeping the problem domain coupled with the implementation.
+As mentioned, the problem domain, when introduced into the implementation, can help with making decisions quickly, as you can immediately see the impact the implementation will have on getting closer to the goal of solving or working with the problem in its current form.
+The problem with object-oriented design lies in the inevitability of change at a higher level.
+
+Designs change for multiple reasons, occasionally including times when they actually haven't.
+A misunderstanding of a design, or a misinterpretation of a design, will cause as much change in the implementation as a literal request for change of design.
+A data-oriented approach to code design considers the change in design through the lens of understanding the change in the meaning of the data.
+The data-oriented approach to design also allows for change to the code when the source of data changes, unlike the encapsulated internal state manipulations of the object-oriented approach.
+In general, data-oriented design handles change better as pieces of data and transforms can be more simply coupled and decoupled than objects can be mutated and reused.
+
+The reason this is so, comes from linking the intention, or the aspect, to the data.
+When lumping data and functions in with concepts of objects, you find the objects are the schema of the data.
+The aspect of the data is linked to that object, which means it's hard to think of the data from another point of view.
+The use case of the data, and the real-world or design, are now linked to the data layout through a singular vision implied by the object definition.
+If you link your data layout to the union of the required data for your expected manipulations, and your data manipulations are linked by aspects of your data, then you make it hard to unlink data related by aspect.
+The difficulty comes when different aspects need different subsets of the data, and they overlap.
+When they overlap, they create a larger and larger set of values that need to travel around the system as one unit.
+It's common to refactor a class out into two or more classes, or give ownership of data to a different class.
+This is what is meant by tying data to an aspect.
+It is tied to the lens through which the data has purpose, but with static typed objects that purpose is predefined, a union of multiple purposes, and sometimes carries around defunct relationships.
+Some purposes may no longer be required by the design.
+Unfortunately, it's easier to see when a relationship needs to exist, than when it doesn't, and that leads to more connections, not fewer, over time.
+
+If you link your operations by related data, such as when you put methods on a class, you make it hard to unlink your operations when the data changes or splits, and you make it hard to split data when an operation requires the data to be together for its own purposes.
+If you keep your data in one place, operations in another place, and keep the aspects and roles of data intrinsic from how the operations and transforms are applied to the data, then you will find that many times when refactoring would have been large and difficult in object-oriented code, the task now becomes trivial or non-existent.
+With this benefit comes a cost of keeping tabs on what data is required for each operation, and the potential danger of de-synchronisation.
+This consideration can lead to keeping some cold code in an object-oriented style where objects are responsible for maintaining internal consistency over efficiency and mutability.
+Examples of places where object-oriented design is far superior to data-oriented can be that of driver layers for systems or hardware.
+Even though Vulkan and OpenGL are object-oriented, the granularity of the objects is large and linked to stable concepts in their space, just like the object-oriented approach of the FILE type or handle, in open, close, read, and write operations in filesystems.
+
+A big misunderstanding for many new to the data-oriented design paradigm, a concept brought over from abstraction based development, is that we can design a static library or set of templates to provide generic solutions to everything presented in this book as a data-oriented solution.
+Much like with domain driven design, data-oriented design is product and work-flow specific.
+You learn how to do data-oriented design, not how to add it to your project.
+The fundamental truth is that data, though it can be generic by type, is not generic in how it is used.
+The values are different and often contain patterns we can turn to our advantage.
+The idea that data can be generic is a false claim that data-oriented design attempts to rectify.
+The transforms applied to data can be generic to some extent, but the order and selection of operations are literally the solution to the problem.
+Source code is the recipe for conversion of data from one form into another.
+There cannot be a library of templates for understanding and leveraging patterns in the data, and that's what drives a successful data-oriented design.
+It's true we can build algorithms to find patterns in data, otherwise, how would it be possible to do compression, but the patterns we think about when it comes to data-oriented design are higher level, domain-specific, and not simple frequency mappings.
+
+Our run-time benefits from specialisation through performance tricks that sometimes make the code harder to read, but it is frequently discouraged as being not object-oriented, or being too hard-coded.
+It can be better to hard-code a transform than to pretend it's not hard-coded by wrapping it in a generic container and using less direct algorithms on it.
+Using existing templates like this provides a benefit of an increase in readability for those who already know the library, and potentially fewer bugs if the functionality was in some way generic.
+But, if the functionality was not well mapped to the existing generic solution, writing it with a function template and then extending will make the code harder to understand.
+Hiding the fact that the technique had been changed subtly will introduced false assumptions.
+Hard-coding a new algorithm is a better choice as long as it has sufficient tests, and is objectively new.
+Tests will also be easier to write if you constrain yourself to the facts about concrete data and only test with real, but simple data for your problem, and not generic types on generic data.
+
 \subsection{How Is Data Formed?}
+
+The games we write have a lot of data, in a lot of different formats.
+We have textures in multiple formats for multiple platforms.
+There are animations, usually optimised for different skeletons or types of playback.
+There are sounds, lights, and scripts.
+Don't forget meshes, they consist of multiple buffers of attributes.
+Only a very small proportion of meshes are old fixed function type with vertices containing positions, UVs, and normals.
+The data in game development is hard to box, and getting harder to pin down as more ideas which were previously considered impossible have now become commonplace.
+This is why we spend a lot of time working on editors and tool-chains, so we can take the free-form output from designers and artists and find a way to put it into our engines.
+Without our tool-chains, editors, viewers, and tweaking tools, there would be no way we could produce a game with the time we have.
+The object-oriented approach provides a good way to wrap our heads around all these different formats of data.
+It gives a centralised view of where each type of data belongs and classifies it by what can be done to it.
+This makes it very easy to add and use data quickly, but implementing all these different wrapper objects takes time.
+Adding new functionality to these objects can sometimes require large amounts of refactoring as occasionally objects are classified in such a way that they don't allow for new features to exist.
+For example, in many old engines, textures were always 1,2, or 4 bytes per pixel.
+With the advent of floating point textures, all that code required a minor refactoring.
+In the past, it was not possible to read a texture from the vertex shader, so when texture based skinning came along, many engine programmers had to refactor their render update.
+They had to allow for a vertex shader texture upload because it might be necessary when uploading transforms for rendering a skinned mesh.
+When the PlayStation2 came along, or an engine first used shaders, the very idea of what made a material had to change.
+In the move from small 3D environments to large open worlds with level of detail caused many engineers to start thinking about what it meant for something to need rendering.
+When newer hardware became more picky about alignment, other hard to inject changes had to be made.
+In many engines, mesh data is optimised for rendering, but when you have to do mesh ray casting to see where bullets have hit, or for doing inverse kinematics (IK), or physics, then you need multiple representations of an entity.
+At this point, the object-oriented approach starts to look cobbled together as there are fewer objects that represent real things, and more objects used as containers so programmers can think in larger building blocks.
+These blocks hinder though, as they become the only blocks used in thought, and stop potential mental connections from happening.
+We went from 2D sprites to 3D meshes, following the format of the hardware provider, to custom data streams and compute units turning the streams into rendered triangles.
+Wave data, to banks, to envelope controlled grain tables and slews of layered sounds.
+Tilemaps, to portals and rooms, to streamed, multiple levels of detail chunks of world, to hybrid mesh palette, props, and unique stitching assets.
+From flip-book to Euler angle sequences, to quaternions and spherical interpolated animations, to animation trees and behaviour mapping/trees.
+Change is the only constant.
+
+All these types of data are pretty common if you've worked in games at all, and many engines do provide an abstraction to these more fundamental types.
+When a new type of data becomes heavily used it is promoted into engines as a core type.
+We normally consider the trade-off of new types being handled as special cases until they become ubiquitous to be one of usability vs performance.
+We don't want to provide free access to the lesser understood elements of game development.
+People who are not, or can not, invest time in finding out how best to use new features, are discouraged from using them.
+The object-oriented game development way to do that is to not provide objects which represent them, and instead only offer the features to people who know how to utilise the more advanced tools.
+
+Apart from the objects representing digital assets, there are also objects for internal game logic.
+For every game, there are objects which only exist to further the game-play.
+Collectable card games have a lot of textures, but they also have a great deal of rules, card stats, player decks, match records, with many objects to represent the current state of play.
+All of these objects are completely custom designed for one game.
+There may be sequels, but unless it's primarily a re-skin, it will use quite different game logic in many places, and therefore require different data, which would imply different methods on the now guaranteed to be internally different objects.
+
+Game data is complex.
+Any first layout of the data is inspired by the game's initial design.
+Once development is underway, the layout needs to keep up with whichever way the game evolves.
+Object-oriented techniques offer a quick way to implement any given design, are very quick at implementing each singular design in turn, but don't offer a clean or graceful way to migrate from one data schema to the next.
+There are hacks, such as those used in version based asset handlers, or in frameworks backed by update systems and conversion scripts, but normally, game developers change the tool-chain and the engine at the same time, do a full re-export of all the assets, then commit to the next version all in one go.
+This can be quite a painful experience if it has to happen over multiple sites at the same time, or if you have a lot of assets, or if you are trying to provide engine support for more than one title, and only one wants to change to the new revision.
+An example of an object-oriented approach that handles migration of design with some grace is the Django framework, but the reason it handles the migration well is that the objects would appear to be views into data models, not the data itself.
+
+There have not yet been any successful efforts to build a generic game asset solution.
+This may be because all games differ in so many subtle ways that if you did provide a generic solution, it wouldn't be a game solution, just a new language.
+There is no solution to be found in trying to provide all the possible types of object a game can use.
+But, there is a solution if we go back to thinking about a game as merely running a set of computations on some data.
+The closest we can get in 2018 is the FBX format, with some dependence on the current standard shader languages.
+The current solutions appear to have excess baggage which does not seem easy to remove.
+Due to the need to be generic, many details are lost through abstractions and strategies to present data in a non-confrontational way.
+
 \subsection{What Can Provide A Computational Framework For Such Complex Data}
+
+Game developers are notorious for thinking about game development from either a low level all out performance perspective or from a very high-level gameplay and interaction perspective.
+This may have come about because of the widening gap between the amount of code that has to be high performance, and the amount of code to make the game complete.
+Object-oriented techniques provide good coverage of the high-level aspect, so the high-level programmers are content with their tools.
+The performance specialists have been finding ways of doing more with the hardware, so much so that a lot of the time content creators think they don't have a part in the optimisation process.
+There has never been much of a middle ground in game development, which is probably the primary reason why the structure and performance techniques employed by big-iron companies didn't seem useful.
+The secondary reason could be that game developers don't normally develop systems and applications which have decade-long maintenance expectations and therefore are less likely to be concerned about why their code should be encapsulated and protected or at least well documented.
+When game development was first flourishing into larger studios in the late 1990s, academic or corporate software engineering practices were seen as suspicious because wherever they were employed, there was a dramatic drop in game performance, and whenever any prospective employees came from those industries, they failed to impress.
+As games machines became more like the standard micro-computers, and standard micro-computers drew closer in design to the mainframes of old, the more apparent it became that some of those standard professional software engineering practices could be useful.
+Now the scale of games has grown to match the hardware, but the games industry has stopped looking at where those non-game development practices led.
+As an industry, we should be looking to where others have gone before us, and the closest set of academic and professional development techniques seem to be grounded in simulation and high volume data analysis.
+We still have industry-specific challenges such as the problems of high frequency highly heterogeneous transformational requirements that we experience in sufficiently voluminous AI environments, and we have the issue of user proximity in networked environments, such as the problems faced by MMOs when they have location-based events, and bandwidth starts to hit $n^2$ issues as everyone is trying to message everyone else.
+
+With each successive generation, the number of developer hours to create a game has grown, which is why project management and software engineering practices have become standardised at the larger games companies.
+There was a time when game developers were seen as cutting-edge programmers, inventing new technology as the need arises, but with the advent of less adventurous hardware (most notably in the x86 based recent 8th generations), there has been a shift away from ingenious coding practices, and towards a standardised process.
+This means game development can be tuned to ensure the release date will coincide with marketing dates.
+There will always be an element of randomness in high profile game development.
+There will always be an element of innovation that virtually guarantees you will not be able to predict how long the project, or at least one part of the project, will take.
+Even if data-oriented design isn't needed to make your game go faster, it can be used to make your game development schedule more regular.
+
+Part of the difficulty in adding new and innovative features to a game is the data layout.
+If you need to change the data layout for a game, it will need objects to be redesigned or extended in order to work within the existing framework.
+If there is no new data, then a feature might require that previously separate systems suddenly be able to talk to each other quite intimately.
+This coupling can often cause system-wide confusion with additional temporal coupling and corner cases so obscure they can only be reproduced one time in a million.
+These odds might sound fine to some developers, but if you're expecting to sell five to fifty million copies of your game, at one in a million, that's five to fifty people who will experience the problem, can take a video of your game behaving oddly, post it on the YouTube, and call your company rubbish, or your developers lazy, because they hadn't fixed an obvious bug.
+Worse, what if the one in a million issue was a way to circumvent in-app-purchases, and was reproducible if you knew what to do and the steps start spreading on Twitter, or maybe created an economy-destroying influx of resources in a live MMO universe.
+In the past, if you had sold five to fifty million copies of your game, you wouldn't care, but with the advent of free-to-play games, five million players might be considered a good start, and poor reviews coming in will curb the growth.
+IAP circumventions will kill your income, and economy destruction will end you.
+
+Big iron developers had these same concerns back in the 1970s.
+Their software had to be built to high standards because their programs would frequently be working on data concerned with real money transactions.
+They needed to write business logic that operated on the data, but most important of all, they had to make sure the data was updated through a provably careful set of operations in order to maintain its integrity.
+Database technology grew from the need to process stored data, to do complex analysis on it, to store and update it, and be able to guarantee it was valid at all times.
+To do this, the ACID test was used to ensure atomicity, consistency, isolation, and durability.
+Atomicity was the test to ensure all transactions would either complete or do nothing.
+It could be very bad for a database to update only one account in a financial transaction.
+There could be money lost or created if a transaction was not atomic.
+Consistency was added to ensure all the resultant state changes which should happen during a transaction do happen, that is, all triggers which should fire, do fire, even if the triggers cause triggers recursively, with no limit.
+This would be highly important if an account should be blocked after it has triggered a form of fraud detection.
+If a trigger has not fired, then the company using the database could risk being liable for even more than if they had stopped the account when they first detected fraud.
+Isolation is concerned with ensuring all transactions which occur cannot cause any other transactions to differ in behaviour.
+Normally this means that if two transactions appear to work on the same data, they have to queue up and not try to operate at the same time.
+Although this is generally good, it does cause concurrency problems.
+Finally, durability.
+This was the second most important element of the four, as it has always been important to ensure that once a transaction has completed, it remains so.
+In database terminology, durability meant the transaction would be guaranteed to have been stored in such a way that it would survive server crashes or power outages.
+This was important for networked computers where it would be important to know what transactions had definitely happened when a server crashed or a connection dropped.
+
+Modern networked games also have to worry about highly important data like this.
+With non-free downloadable content, consumers care about consistency.
+With consumable downloadable content, users care a great deal about every transaction.
+To provide much of the functionality required of the database ACID test, game developers have gone back to looking at how databases were designed to cope with these strict requirements and found reference to staged commits, idempotent functions, techniques for concurrent development, and a vast literature base on how to design tables for a database.
+
 \subsection{Conclusions And Takeaways}
+
+We've talked about data-oriented design being a way to think about and lay out your data and to make decisions about your architecture.
+We have two principles that can drive many of the decisions we need to make when doing data-oriented design.
+To finish the chapter, there are some takeaways you can use immediately to begin your journey.
+
+Consider how your data is being influenced by what it's called.
+Consider the possibility that the proximity of other data can influence the meaning of your data, and in doing so, trap it in a model that inhibits flexibility.
+For the consideration of the first principle, data is not the problem domain, it's worth thinking about the following items :
+
+\begin{enumerate}
+    \item
+          What is tying your data together, is it a concept or implied meaning?
+    \item
+          Is your data layout defined by a single interpretation from a single point of view?
+    \item
+          Think about how the data could be reinterpreted and cut along those lines.
+    \item
+          What is it about the data that makes it uniquely important?
+\end{enumerate}
+
+You are not targeting an unknown device with unknowable characteristics.
+Know your data, and know your target hardware.
+To some extent, understand how much each stream of data matters, and who is consuming it.
+Understand the cost and potential value of improvements.
+Access patterns matter, as you cannot hit the cache if you're accessing things in a burst, then not touching them again for a whole cycle of the application.
+For the consideration of the second principle, data is the type, frequency, quantity, shape, and probability, it's worth thinking about the following items :
+
+\begin{enumerate}
+    \item
+          What is the smallest unit of memory on your target platform?1.6
+    \item
+          When you read data, how much of it are you using?
+    \item
+          How often do you need the data? Is it once, or a thousand times a frame?
+    \item
+          How do you access the data? At random, or in a burst?
+    \item
+          Are you always modifying the data, or just reading it? Are you modifying all of it?
+    \item
+          Who does the data matter to, and what about it matters?
+    \item
+          Find out the quality constraints of your solutions, in terms of bandwidth and latency.
+    \item
+          What information do you have that isn't in the data per-se? What is implicit?
+\end{enumerate}
+
+\newpage
 \section{Relational Databases}
+
+In order to lay your data out better, it's useful to have an understanding of the methods available to convert your existing structures into something linear.
+The problems we face when applying data-oriented approaches to existing code and data layouts usually stem from the complexity of state inherent in data-hiding or encapsulating programming paradigms.
+These paradigms hide away internal state so you don't have to think about it, but they hinder when it comes to reconfiguring data layouts.
+This is not because they don't abstract enough to allow changes to the underlying structure without impacting the correctness of the code that uses it, but instead because they have connected and given meaning to the structure of the data.
+That type of coupling can be hard to remove.
+
+In this chapter, we go over some of the pertinent parts of the relational model, relational database technology, and normalisation, as these are examples of converting highly complex data structures and relationships into very clean collections of linear storable data entries.
+
+You certainly don't have to move your data to a database style to do data-oriented design, but there are many places where you will wish you had a simple array to work with, and this chapter will help you by giving you an example of how you can migrate from a web of connected complex objects to a simpler to reason about relational model of arrays.
+
 \subsection{Complex State}
-\subsection{Complex State}
+
+When you think about the data present in most software, it has some qualities of complexity or interconnectedness.
+When it comes to game development, there are many ways in which the game entities interact, and many ways in which their attached resources will need to feed through different stages of processes to achieve the audio, visual and sometimes haptic feedback necessary to fully immerse the player.
+For many programmers brought up on object-oriented design, the idea of reducing the types of structure available down to just simple arrays, is virtually unthinkable.
+It's very hard to go from working with objects, classes, templates, and methods on encapsulated data to a world where you only have access to linear containers.
+
+In \textit{A Relational Model of Data for Large Shared Data Banks}, Edgar F. Codd proposed the relational model to handle the current and future needs of agents interacting with data.
+He proposed a solution to structuring data for insert, update, delete, and query operations.
+His proposal claimed to reduce the need to maintain a deep understanding of how the data was laid out to use it well.
+His proposal also claimed to reduce the likelihood of introducing internal inconsistencies.
+
+The relational model provided a framework, and in \textit{Further Normalization of the Data Base Relational Model}, Edgar F. Codd introduced the fundamental terms of normalisation we use to this day in a systematic approach to reducing the most complex of interconnected state information to linear lists of unique independent tuples.
+
 \subsection{What Can Provide A Computational Framework For Complex Data}
 \subsection{Normalising Your Data}
 \subsection{Normalisation}
