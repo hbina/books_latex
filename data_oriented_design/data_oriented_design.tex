@@ -422,7 +422,107 @@ His proposal also claimed to reduce the likelihood of introducing internal incon
 The relational model provided a framework, and in \textit{Further Normalization of the Data Base Relational Model}, Edgar F. Codd introduced the fundamental terms of normalisation we use to this day in a systematic approach to reducing the most complex of interconnected state information to linear lists of unique independent tuples.
 
 \subsection{What Can Provide A Computational Framework For Complex Data}
+
+Databases store highly complex data in a structured way and provide a language for transforming and generating reports based on that data.
+ The language, SQL, invented in the 1970's by Donald D. Chamberlin and Raymond F. Boyce at IBM, provides a method by which it is possible to store computable data while also maintaining data relationships following in the form of the relational model. 
+ Games don't have simple computable data, they have classes and objects. 
+ They have guns, swords, cars, gems, daily events, textures, sounds, and achievements.
+  It is very easy to conclude that database technology doesn't work for the object-oriented approach game developers use.
+
+The data relationships in games can be highly complex, it would seem at first glance that it doesn't neatly fit into database rows.
+ A CD collection easily fits in a database, with your albums neatly arranged in a single table.
+  But, many game objects won't fit into rows of columns.
+   For the uninitiated, it can be hard to find the right table columns to describe a level file.
+    Trying to find the right columns to describe a car in a racing game can be a puzzle.
+     Do you need a column for each wheel? Do you need a column for each collision primitive, or just a column for the collision mesh?
+
+An obvious answer could be that game data doesn't fit neatly into the database way of thinking.
+ However, that's only because we've not normalised the data.
+  To show how you can convert from a network model, or hierarchical model to what we need, we will work through these normalisation steps.
+   We'll start with a level file as we find out how these decades-old techniques can provide a very useful insight into what game data is really doing.
+
+We shall discover that everything we do is already in a database, but it wasn't obvious to us because of how we store our data.
+ The structure of any data is a trade-off between performance, readability, maintenance, future proofing, extendibility, and reuse.
+  For example, the most flexible database in common use is your filesystem.
+   It has one table with two columns. A primary key of the file path, and a string for the data.
+    This simple database system is the perfect fit for a completely future proof system.
+     There's nothing that can't be stored in a file.
+      The more complex the tables get, the less future proof, and the less maintainable, but the higher the performance and readability.
+       For example, a file has no documentation of its own, but the schema of a database could be all that is required to understand a sufficiently well-designed database.
+        That's how games don't even appear to have databases.
+         They are so complex, for the sake of performance, they have forgotten they are merely a data transform.
+          This sliding scale of complexity affects scalability too, which is why some people have moved towards NoSQL databases, and document store types of data storage.
+           These systems are more like a filesystem where the documents are accessed by name, and have fewer limits on how they are structured.
+            This has been good for horizontal scalability, as it's simpler to add more hardware when you don't have to keep your data consistent across multiple tables that might be on different machines.
+             There may come a day when memory is so tightly tied to the closest physical CPU, or when memory chips themselves get more processing power, or running 100 SoCs inside your desktop rig is more effective than a single monolithic CPU, that moving to document store at the high-level could be beneficial inside your app, but for now, there do not seem to be any benefits in that processing model for tasks on local hardware.
+
+We're not going to go into the details of the lowest level of how we utilise large data primitives such as meshes, textures, sounds and such.
+ For now, think of these raw assets (sounds, textures, vertex buffers, etc.) as primitives, much like the integers, floating point numbers, strings and boolean values we shall be working with.
+  We do this because the relational model calls for atomicity when working with data.
+   What is and is not atomic has been debated without an absolute answer becoming clear, but for the intents of developing software intended for human consumption, the granularity can be rooted in considering the data from the perspective of human perception.
+    There are existing APIs that present strings in various ways depending on how they are used, for example the difference between human-readable strings (usually UTF-8) and ASCII strings for debugging.
+     Adding sounds, textures, and meshes to this seems quite natural once you realise all these things are resources which if cut into smaller pieces begin to lose what it is that makes them what they are.
+      For example, half of a sentence is a lot less useful than a whole one, and loses integrity by disassociation.
+       A slice of a sentence is clearly not reusable in any meaningful way with another random slice of a different sentence.
+        Even subtitles are split along meaningful boundaries, and it's this idea of meaningful boundary that gives us our definition of atomicity for software developed for humans.
+         To this end, when working with your data, when you're normalising, try to stay at the level of nouns, the nameable pieces.
+          A whole song can be an atom, but so is a single tick sound of a clock.
+           A whole page of text is an atom, but so is the player's gamer-tag. 
+
 \subsection{Normalising Your Data}
+
+ TODO : Codify certain keywords.
+
+All tables are made up of rows and columns.
+ In a database, each row must be unique.
+  This constraint has important consequences.
+   When you have normalised your data, it becomes clear why duplicate rows don't make sense, but for now, from a computer programming point of view, consider tables to be more like sets, where the whole row is the set value.
+    This is very close to reality, as sets are also not ordered, and a database table is not ordered either.
+     There is always some differentiation between rows, even if a database management system (DBMS) has to rely on hidden row ID values.
+      It is better to not rely on this as databases work more efficiently when the way in which they are used matches their design.
+       All tables need a key.
+        The key is often used to order the sorting of the table in physical media, to help optimise queries.
+         For this reason, the key needs to be unique, but as small as possible.
+          You can think of the key as the key in a map or dictionary.
+           Because of the uniqueness rule, every table has an implicit key because the table can use the combination of all the columns at once to identify each row uniquely.
+            That is, the key, or the unique lookup, which is the primary key for a table, can be defined as the totality of the whole row.
+             If the row is unique, then the primary key is unique.
+              Normally, we try to avoid using the whole row as the primary key, but sometimes, it's actually our only choice.
+               We will come across examples of that later.
+
+For example, in the mesh table, the combination of meshID and filename is guaranteed to be unique.
+ However, currently it's only guaranteed to be unique because we have presumed that the meshID is unique.
+  If it was the same mesh, loaded from the same file, it could still have a different meshID.
+   The same can be said for the textureID and filename in the textures table.
+    From the table [ TODO : TABLE IN LATEX? ] it's possible to see how we could use the type, mesh, texture, tint and animation to uniquely define each Pickup prototype.
+
+Now consider rooms.
+ If you use all the columns other than the RoomID of the room table, you will find the combination can be used to uniquely define the room.
+  If you consider an alternative, where a row had the same combination of values making up the room, it would in fact be describing the same room.
+   From this, it can be claimed that the RoomID is being used as an alias for the rest of the data.
+    We have stuck the RoomID in the table, but where did it come from?
+     To start with, it came from the setup script.
+      The script had a RoomID, but we didn't need it at that stage.
+       We needed it for the destination of the doors.
+        In another situation, where nothing connected logically to the room, we would not need a RoomID as we would not need an alias to it.
+
+A primary key must be unique.
+ RoomID is an example of a primary key because it uniquely describes the room.
+  It is an alias in this sense as it contains no data in and of itself, but merely acts as a handle.
+   In some cases the primary key is information too, which again, we will meet later.
+
+As a bit of an aside, the idea that a row in a database is also the key can be a core concept worth spending time thinking about.
+ If a database table is a set, when you insert a record, you're actually just asking that one particular combination of data is being recorded as existing.
+  It is as if a database table is a very sparse set from an extremely large domain of possible values.
+   This can be useful because you may notice that under some circumstances, the set of possible values isn't very large, and your table can be more easily defined as a bit set.
+    As an example, consider a table which lists the players in an MMO that are online right now.
+     For an MMO that shards its servers, there can be limits in the early thousands for the number of unique players on each server.
+      In that case, it may be easier to store the currently online players as a bit set.
+       If there are at most 10,000 players online, and only 1000 players online at any one time, then the bitset representation would take up 1.25kb of memory, whereas storing the online players as a list of IDs, would require at least 2kb of data if their IDs were shrunk to shorts, or 4kb if they had 32bit IDs to keep them unique across multiple servers.
+        The other benefit in this case is the performance of queries into the data
+        . To quickly access the ID in the list, you need it to remain sorted.
+         The best case then is $ \mathcal{O}(\log{}n)$. In the bitset variant, it's $ \mathcal{O}(1)$
+
 \subsection{Normalisation}
 \subsubsection{Primary Keys}
 \subsubsection{1st Normal Form}
