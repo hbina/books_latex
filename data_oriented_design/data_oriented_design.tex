@@ -358,14 +358,14 @@ Consider the possibility that the proximity of other data can influence the mean
 For the consideration of the first principle, data is not the problem domain, it's worth thinking about the following items :
 
 \begin{enumerate}
-    \item
-          What is tying your data together, is it a concept or implied meaning?
-    \item
-          Is your data layout defined by a single interpretation from a single point of view?
-    \item
-          Think about how the data could be reinterpreted and cut along those lines.
-    \item
-          What is it about the data that makes it uniquely important?
+      \item
+            What is tying your data together, is it a concept or implied meaning?
+      \item
+            Is your data layout defined by a single interpretation from a single point of view?
+      \item
+            Think about how the data could be reinterpreted and cut along those lines.
+      \item
+            What is it about the data that makes it uniquely important?
 \end{enumerate}
 
 You are not targeting an unknown device with unknowable characteristics.
@@ -376,22 +376,22 @@ Access patterns matter, as you cannot hit the cache if you're accessing things i
 For the consideration of the second principle, data is the type, frequency, quantity, shape, and probability, it's worth thinking about the following items :
 
 \begin{enumerate}
-    \item
-          What is the smallest unit of memory on your target platform?1.6
-    \item
-          When you read data, how much of it are you using?
-    \item
-          How often do you need the data? Is it once, or a thousand times a frame?
-    \item
-          How do you access the data? At random, or in a burst?
-    \item
-          Are you always modifying the data, or just reading it? Are you modifying all of it?
-    \item
-          Who does the data matter to, and what about it matters?
-    \item
-          Find out the quality constraints of your solutions, in terms of bandwidth and latency.
-    \item
-          What information do you have that isn't in the data per-se? What is implicit?
+      \item
+            What is the smallest unit of memory on your target platform?1.6
+      \item
+            When you read data, how much of it are you using?
+      \item
+            How often do you need the data? Is it once, or a thousand times a frame?
+      \item
+            How do you access the data? At random, or in a burst?
+      \item
+            Are you always modifying the data, or just reading it? Are you modifying all of it?
+      \item
+            Who does the data matter to, and what about it matters?
+      \item
+            Find out the quality constraints of your solutions, in terms of bandwidth and latency.
+      \item
+            What information do you have that isn't in the data per-se? What is implicit?
 \end{enumerate}
 
 \newpage
@@ -424,113 +424,194 @@ The relational model provided a framework, and in \textit{Further Normalization 
 \subsection{What Can Provide A Computational Framework For Complex Data}
 
 Databases store highly complex data in a structured way and provide a language for transforming and generating reports based on that data.
- The language, SQL, invented in the 1970's by Donald D. Chamberlin and Raymond F. Boyce at IBM, provides a method by which it is possible to store computable data while also maintaining data relationships following in the form of the relational model. 
- Games don't have simple computable data, they have classes and objects. 
- They have guns, swords, cars, gems, daily events, textures, sounds, and achievements.
-  It is very easy to conclude that database technology doesn't work for the object-oriented approach game developers use.
+The language, SQL, invented in the 1970's by Donald D. Chamberlin and Raymond F. Boyce at IBM, provides a method by which it is possible to store computable data while also maintaining data relationships following in the form of the relational model.
+Games don't have simple computable data, they have classes and objects.
+They have guns, swords, cars, gems, daily events, textures, sounds, and achievements.
+It is very easy to conclude that database technology doesn't work for the object-oriented approach game developers use.
 
 The data relationships in games can be highly complex, it would seem at first glance that it doesn't neatly fit into database rows.
- A CD collection easily fits in a database, with your albums neatly arranged in a single table.
-  But, many game objects won't fit into rows of columns.
-   For the uninitiated, it can be hard to find the right table columns to describe a level file.
-    Trying to find the right columns to describe a car in a racing game can be a puzzle.
-     Do you need a column for each wheel? Do you need a column for each collision primitive, or just a column for the collision mesh?
+A CD collection easily fits in a database, with your albums neatly arranged in a single table.
+But, many game objects won't fit into rows of columns.
+For the uninitiated, it can be hard to find the right table columns to describe a level file.
+Trying to find the right columns to describe a car in a racing game can be a puzzle.
+Do you need a column for each wheel? Do you need a column for each collision primitive, or just a column for the collision mesh?
 
 An obvious answer could be that game data doesn't fit neatly into the database way of thinking.
- However, that's only because we've not normalised the data.
-  To show how you can convert from a network model, or hierarchical model to what we need, we will work through these normalisation steps.
-   We'll start with a level file as we find out how these decades-old techniques can provide a very useful insight into what game data is really doing.
+However, that's only because we've not normalised the data.
+To show how you can convert from a network model, or hierarchical model to what we need, we will work through these normalisation steps.
+We'll start with a level file as we find out how these decades-old techniques can provide a very useful insight into what game data is really doing.
 
 We shall discover that everything we do is already in a database, but it wasn't obvious to us because of how we store our data.
- The structure of any data is a trade-off between performance, readability, maintenance, future proofing, extendibility, and reuse.
-  For example, the most flexible database in common use is your filesystem.
-   It has one table with two columns. A primary key of the file path, and a string for the data.
-    This simple database system is the perfect fit for a completely future proof system.
-     There's nothing that can't be stored in a file.
-      The more complex the tables get, the less future proof, and the less maintainable, but the higher the performance and readability.
-       For example, a file has no documentation of its own, but the schema of a database could be all that is required to understand a sufficiently well-designed database.
-        That's how games don't even appear to have databases.
-         They are so complex, for the sake of performance, they have forgotten they are merely a data transform.
-          This sliding scale of complexity affects scalability too, which is why some people have moved towards NoSQL databases, and document store types of data storage.
-           These systems are more like a filesystem where the documents are accessed by name, and have fewer limits on how they are structured.
-            This has been good for horizontal scalability, as it's simpler to add more hardware when you don't have to keep your data consistent across multiple tables that might be on different machines.
-             There may come a day when memory is so tightly tied to the closest physical CPU, or when memory chips themselves get more processing power, or running 100 SoCs inside your desktop rig is more effective than a single monolithic CPU, that moving to document store at the high-level could be beneficial inside your app, but for now, there do not seem to be any benefits in that processing model for tasks on local hardware.
+The structure of any data is a trade-off between performance, readability, maintenance, future proofing, extendibility, and reuse.
+For example, the most flexible database in common use is your filesystem.
+It has one table with two columns. A primary key of the file path, and a string for the data.
+This simple database system is the perfect fit for a completely future proof system.
+There's nothing that can't be stored in a file.
+The more complex the tables get, the less future proof, and the less maintainable, but the higher the performance and readability.
+For example, a file has no documentation of its own, but the schema of a database could be all that is required to understand a sufficiently well-designed database.
+That's how games don't even appear to have databases.
+They are so complex, for the sake of performance, they have forgotten they are merely a data transform.
+This sliding scale of complexity affects scalability too, which is why some people have moved towards NoSQL databases, and document store types of data storage.
+These systems are more like a filesystem where the documents are accessed by name, and have fewer limits on how they are structured.
+This has been good for horizontal scalability, as it's simpler to add more hardware when you don't have to keep your data consistent across multiple tables that might be on different machines.
+There may come a day when memory is so tightly tied to the closest physical CPU, or when memory chips themselves get more processing power, or running 100 SoCs inside your desktop rig is more effective than a single monolithic CPU, that moving to document store at the high-level could be beneficial inside your app, but for now, there do not seem to be any benefits in that processing model for tasks on local hardware.
 
 We're not going to go into the details of the lowest level of how we utilise large data primitives such as meshes, textures, sounds and such.
- For now, think of these raw assets (sounds, textures, vertex buffers, etc.) as primitives, much like the integers, floating point numbers, strings and boolean values we shall be working with.
-  We do this because the relational model calls for atomicity when working with data.
-   What is and is not atomic has been debated without an absolute answer becoming clear, but for the intents of developing software intended for human consumption, the granularity can be rooted in considering the data from the perspective of human perception.
-    There are existing APIs that present strings in various ways depending on how they are used, for example the difference between human-readable strings (usually UTF-8) and ASCII strings for debugging.
-     Adding sounds, textures, and meshes to this seems quite natural once you realise all these things are resources which if cut into smaller pieces begin to lose what it is that makes them what they are.
-      For example, half of a sentence is a lot less useful than a whole one, and loses integrity by disassociation.
-       A slice of a sentence is clearly not reusable in any meaningful way with another random slice of a different sentence.
-        Even subtitles are split along meaningful boundaries, and it's this idea of meaningful boundary that gives us our definition of atomicity for software developed for humans.
-         To this end, when working with your data, when you're normalising, try to stay at the level of nouns, the nameable pieces.
-          A whole song can be an atom, but so is a single tick sound of a clock.
-           A whole page of text is an atom, but so is the player's gamer-tag. 
+For now, think of these raw assets (sounds, textures, vertex buffers, etc.) as primitives, much like the integers, floating point numbers, strings and boolean values we shall be working with.
+We do this because the relational model calls for atomicity when working with data.
+What is and is not atomic has been debated without an absolute answer becoming clear, but for the intents of developing software intended for human consumption, the granularity can be rooted in considering the data from the perspective of human perception.
+There are existing APIs that present strings in various ways depending on how they are used, for example the difference between human-readable strings (usually UTF-8) and ASCII strings for debugging.
+Adding sounds, textures, and meshes to this seems quite natural once you realise all these things are resources which if cut into smaller pieces begin to lose what it is that makes them what they are.
+For example, half of a sentence is a lot less useful than a whole one, and loses integrity by disassociation.
+A slice of a sentence is clearly not reusable in any meaningful way with another random slice of a different sentence.
+Even subtitles are split along meaningful boundaries, and it's this idea of meaningful boundary that gives us our definition of atomicity for software developed for humans.
+To this end, when working with your data, when you're normalising, try to stay at the level of nouns, the nameable pieces.
+A whole song can be an atom, but so is a single tick sound of a clock.
+A whole page of text is an atom, but so is the player's gamer-tag.
 
 \subsection{Normalising Your Data}
 
- TODO : Codify certain keywords.
+We're going to work with a level file for a game where you hunt for keys to unlock doors in order to get to the exit room.
+The level file is a sequence of script calls which create and configure a collection of different game objects which represent a playable level of the game, and the relationships between those objects.
+First, we'll assume it contains rooms (some trapped, some not), with doors leading to other rooms which can be locked.
+It will also contain a set of pickups, some let the player unlock doors, some affect the player's stats (like health potions and armour), and all the rooms have lovely textured meshes, as do all the pickups.
+One of the rooms is marked as the exit, and one has a player start point.
+
+In this setup script (TODO :: LISTING ) we load some resources, create some pickup prototypes, build up a few rooms, add some instances to the rooms, and then link things together.
+Here we also see a standard solution to the problem of things which reference each other.
+We create the rooms before we connect them to each other because before they exist we can't.
+When we create entities in C++, we assume they are bound to memory, and the only efficient way to reference them is through pointers, but we cannot know where they exist in memory before we allocate them, and we cannot allocate them before filling them out with their data as the allocation and initialisation are bound to each other through the \texttt{new} mechanism.
+This means we have difficulty describing relationships between objects before they exist and have to stagger the creation of content into phases of setting up and connecting things together.
+
+To bring this setup script into a usable database-like format, or relational model, we will need to normalise it.
+When putting things in a relational model of any sort, it needs to be in tables.
+In the first step you take all the data and put it into a very messy, but hopefully complete, table design.
+In our case we take the form of the data from the object creation script and fit it into a table.
+The asset loading can be directly translated into tables, as can be seen in table (TODO :: TABLE).
+
+Primed with this data, it's now possible for us to create the \texttt{Pickups}.
+We convert the calls to \texttt{CreatePickup} into the tables in table (TODO :: TABLE).
+Notice that there was a pickup which did not specify a colour tint, and this means we need to use a \texttt{NULL} to represent not giving details about that aspect of the row.
+The same applies to animations.
+Only keys had animations, so there needs to be \texttt{NULL} entries for all non-key rows.
+
+Once we have taken the construction script and generated these first tables, we find the tables contain a lot of \texttt{NULL}s.
+The \texttt{NULL}s in the rows replace the optional content of the objects.
+If an object instance doesn't have a certain attribute then we replace those features with \texttt{NULL}s.
+There are also elements which contain more than one item of data.
+Having multiple doors per room is tricky to handle in this table.
+How would you figure out what doors it had?
+The same goes for whether the door is locked, and whether there are any pickups.
+The first stage in normalising is going to be reducing the number of elements in each cell to 1, and increasing it to 1 where it's currently \texttt{NULL}.
+
+Once we have loaded the assets and have created the pickup prototypes, we move onto creating a table for rooms.
+We need to invent attributes as necessary using \texttt{NULL} everywhere that an instance doesn't have that attribute.
+We convert the calls to \texttt{CreateRoom}, \texttt{AddDoor}, \texttt{SetRoomAsSpecial}, and \texttt{AddPickup}, to columns in the Rooms table.
+See table (TODO :: TABLE) for one way to build up a table that represents all those setup function calls.
+
+\section{Normalisation}
+
+Back when SQL was first created there were only three well-defined stages of data normalisation.
+There are many more now, including six numbered normal forms.
+To get the most out of a database, it is important to know most of them, or at least get a feel for why they exist.
+They teach you about data dependency and can hint at reinterpretations of your data layout.
+For game structures, BCNF (Boyce-Codd normal form is explained later) is probably as far as you normally would need to take your methodical process.
+Beyond that, you might wish to normalise your data for hot/cold access patterns, but that kind of normalisation is not part of the standard literature on database normalisation.
+If you're interested in more than this book covers on the subject, a very good read, and one which introduces the phrase ``The key, the whole key, and nothing but the key." is the article \textit{A Simple Guide to Five Normal Forms in Relational Database Theory} by William Kent.
+
+If a table is in first normal form, then every cell contains one and only one atomic value.
+That is, no arrays of values, and no \texttt{NULL} entries.
+First normal form also requires every row be distinct.
+For those unaware of what a primary key is, we shall discuss that first.
+
+\subsection{Primary Keys}
 
 All tables are made up of rows and columns.
- In a database, each row must be unique.
-  This constraint has important consequences.
-   When you have normalised your data, it becomes clear why duplicate rows don't make sense, but for now, from a computer programming point of view, consider tables to be more like sets, where the whole row is the set value.
-    This is very close to reality, as sets are also not ordered, and a database table is not ordered either.
-     There is always some differentiation between rows, even if a database management system (DBMS) has to rely on hidden row ID values.
-      It is better to not rely on this as databases work more efficiently when the way in which they are used matches their design.
-       All tables need a key.
-        The key is often used to order the sorting of the table in physical media, to help optimise queries.
-         For this reason, the key needs to be unique, but as small as possible.
-          You can think of the key as the key in a map or dictionary.
-           Because of the uniqueness rule, every table has an implicit key because the table can use the combination of all the columns at once to identify each row uniquely.
-            That is, the key, or the unique lookup, which is the primary key for a table, can be defined as the totality of the whole row.
-             If the row is unique, then the primary key is unique.
-              Normally, we try to avoid using the whole row as the primary key, but sometimes, it's actually our only choice.
-               We will come across examples of that later.
+In a database, each row must be unique.
+This constraint has important consequences.
+When you have normalised your data, it becomes clear why duplicate rows don't make sense, but for now, from a computer programming point of view, consider tables to be more like sets, where the whole row is the set value.
+This is very close to reality, as sets are also not ordered, and a database table is not ordered either.
+There is always some differentiation between rows, even if a database management system (DBMS) has to rely on hidden row \texttt{ID} values.
+It is better to not rely on this as databases work more efficiently when the way in which they are used matches their design.
+All tables need a key.
+The key is often used to order the sorting of the table in physical media, to help optimise queries.
+For this reason, the key needs to be unique, but as small as possible.
+You can think of the key as the key in a map or dictionary.
+Because of the uniqueness rule, every table has an implicit key because the table can use the combination of all the columns at once to identify each row uniquely.
+That is, the key, or the unique lookup, which is the primary key for a table, can be defined as the totality of the whole row.
+If the row is unique, then the primary key is unique.
+Normally, we try to avoid using the whole row as the primary key, but sometimes, it's actually our only choice.
+We will come across examples of that later.
 
-For example, in the mesh table, the combination of meshID and filename is guaranteed to be unique.
- However, currently it's only guaranteed to be unique because we have presumed that the meshID is unique.
-  If it was the same mesh, loaded from the same file, it could still have a different meshID.
-   The same can be said for the textureID and filename in the textures table.
-    From the table [ TODO : TABLE IN LATEX? ] it's possible to see how we could use the type, mesh, texture, tint and animation to uniquely define each Pickup prototype.
+For example, in the mesh table, the combination of \texttt{meshID} and filename is guaranteed to be unique.
+However, currently it's only guaranteed to be unique because we have presumed that the \texttt{meshID} is unique.
+If it was the same mesh, loaded from the same file, it could still have a different \texttt{meshID}.
+The same can be said for the \texttt{textureID} and filename in the textures table.
+From the table [ TODO : TABLE IN LATEX? ] it's possible to see how we could use the type, mesh, texture, tint and animation to uniquely define each Pickup prototype.
 
 Now consider rooms.
- If you use all the columns other than the RoomID of the room table, you will find the combination can be used to uniquely define the room.
-  If you consider an alternative, where a row had the same combination of values making up the room, it would in fact be describing the same room.
-   From this, it can be claimed that the RoomID is being used as an alias for the rest of the data.
-    We have stuck the RoomID in the table, but where did it come from?
-     To start with, it came from the setup script.
-      The script had a RoomID, but we didn't need it at that stage.
-       We needed it for the destination of the doors.
-        In another situation, where nothing connected logically to the room, we would not need a RoomID as we would not need an alias to it.
+If you use all the columns other than the \texttt{RoomID} of the room table, you will find the combination can be used to uniquely define the room.
+If you consider an alternative, where a row had the same combination of values making up the room, it would in fact be describing the same room.
+From this, it can be claimed that the \texttt{RoomID} is being used as an alias for the rest of the data.
+We have stuck the \texttt{RoomID} in the table, but where did it come from?
+To start with, it came from the setup script.
+The script had a \texttt{RoomID}, but we didn't need it at that stage.
+We needed it for the destination of the doors.
+In another situation, where nothing connected logically to the room, we would not need a \texttt{RoomID} as we would not need an alias to it.
 
 A primary key must be unique.
- RoomID is an example of a primary key because it uniquely describes the room.
-  It is an alias in this sense as it contains no data in and of itself, but merely acts as a handle.
-   In some cases the primary key is information too, which again, we will meet later.
+\texttt{RoomID} is an example of a primary key because it uniquely describes the room.
+It is an alias in this sense as it contains no data in and of itself, but merely acts as a handle.
+In some cases the primary key is information too, which again, we will meet later.
 
 As a bit of an aside, the idea that a row in a database is also the key can be a core concept worth spending time thinking about.
- If a database table is a set, when you insert a record, you're actually just asking that one particular combination of data is being recorded as existing.
-  It is as if a database table is a very sparse set from an extremely large domain of possible values.
-   This can be useful because you may notice that under some circumstances, the set of possible values isn't very large, and your table can be more easily defined as a bit set.
-    As an example, consider a table which lists the players in an MMO that are online right now.
-     For an MMO that shards its servers, there can be limits in the early thousands for the number of unique players on each server.
-      In that case, it may be easier to store the currently online players as a bit set.
-       If there are at most 10,000 players online, and only 1000 players online at any one time, then the bitset representation would take up 1.25kb of memory, whereas storing the online players as a list of IDs, would require at least 2kb of data if their IDs were shrunk to shorts, or 4kb if they had 32bit IDs to keep them unique across multiple servers.
-        The other benefit in this case is the performance of queries into the data
-        . To quickly access the ID in the list, you need it to remain sorted.
-         The best case then is $ \mathcal{O}(\log{}n)$. In the bitset variant, it's $ \mathcal{O}(1)$
+If a database table is a set, when you insert a record, you're actually just asking that one particular combination of data is being recorded as existing.
+It is as if a database table is a very sparse set from an extremely large domain of possible values.
+This can be useful because you may notice that under some circumstances, the set of possible values isn't very large, and your table can be more easily defined as a bit set.
+As an example, consider a table which lists the players in an MMO that are online right now.
+For an MMO that shards its servers, there can be limits in the early thousands for the number of unique players on each server.
+In that case, it may be easier to store the currently online players as a bit set.
+If there are at most 10,000 players online, and only 1000 players online at any one time, then the bitset representation would take up 1.25kb of memory, whereas storing the online players as a list of \texttt{ID}s, would require at least 2kb of data if their \texttt{ID}s were shrunk to shorts, or 4kb if they had 32bit \texttt{ID}s to keep them unique across multiple servers.
+The other benefit in this case is the performance of queries into the data.
+To quickly access the \texttt{ID} in the list, you need it to remain sorted.
+The best case then is $ \mathcal{O}(\log{}n)$. In the bitset variant, it's $ \mathcal{O}(1)$
 
-\subsection{Normalisation}
-\subsubsection{Primary Keys}
-\subsubsection{1st Normal Form}
+Going back to the asset table, an important and useful detail when we talk about the \texttt{meshID} and \texttt{mesh filename} is that even though there could be two different \texttt{meshID}s pointing at the same file, most programmers would intuitively understand that a single \texttt{meshID} was unlikely to point at two different mesh files.
+Because of this asymmetry, you can deduce, the column that seems more likely to be unique will also be the column you can use as the primary key.
+We'll choose the \texttt{meshID} as it is easier to manipulate and is unlikely to have more than one meaning or usage, but remember, we could have chosen the filename and gone without the \texttt{meshID} altogether.
+
+If we settle on \texttt{TextureID}, \texttt{PickupID}, and \texttt{RoomID} as the primary keys for those tables, we can then look at continuing on to first normal form.
+We're using t1, m2, r3, etc. to show typesafe ID values, but in reality, these can all be simple integers.
+The idea here is to remain readable, but it also shows that each type can have unique \texttt{ID}s for that type, but have common \texttt{ID}s with another.
+For example, a room may have an integer \texttt{ID} value of 0, but so may a texture.
+It can be beneficial to have \texttt{ID}s which are unique across types, as that can help debugging, and using the top few bits in that case can be helpful.
+If you're unlikely to have more than a million entities per class of entity, then you have enough bits to handle over a thousand distinct classes.
+
+\subsubsection{$1st$ Normal Form}
+
+First normal form can be described as making sure the tables are not sparse.
+We require that there be no \texttt{NULL} pointers and that there be no arrays of data in each element of data.
+This can be performed as a process of moving the repeats and all the optional content to other tables.
+Anywhere there is a \texttt{NULL}, it implies optional content.
+Our first fix is going to be the \texttt{Pickups} table, it has optional \texttt{ColourTint} and \texttt{Animation} elements.
+We invent a new table \texttt{PickupTint}, and use the primary key of the \texttt{Pickup} as the primary key of the new table.
+We also invent a new table \texttt{PickupAnim}.
+Table (TODO :: TABLE) shows the result of the transformation, and note we no longer have any \texttt{NULL} entries.
+
 \subsubsection{2nd Normal Form}
 \subsubsection{3rd Normal Form}
 \subsubsection{Boyce-Cold Normal Form}
 \subsubsection{Domain Key/Knowledge}
 \subsubsection{Reflections}
+
+What we see here as we normalise our data is a tendency to split data by dependency. Looking at many third party engines and APIs, you can see some parallels with the results of these normalisations. It's unlikely that the people involved in the design and evolution of these engines took their data and applied database normalisation techniques, but sometimes the separations between object and components of objects can be obvious enough that you don't need a formal technique in order to realise some positive structural changes.
+
+In some games, the entity object is not just an object that can be anything, but is instead a specific subset of the types of entity involved in the game. For example, in one game there might be a class for the player character, and one for each major type of enemy character, and another for vehicles. The player may have different attributes to other entities, such as lacking AI controls, or having player controls, or having regenerating health, or having ammo. This object-oriented approach puts a line, invisible to the user, but intrusive to the developer, between classes of object and their instances. It is intrusive because when classes touch, they have to adapt to each other. When they don't reside in the same hierarchy, they have to work through abstraction layers to message each other. The amount of code required to bridge these gaps can be small, but they always introduce complexity.
+
+When developing software, this usually manifests as time spent writing out templated code that can operate on multiple classes rather than refactoring the classes involved into more discrete components. This could be considered wasted time as the likelihood of other operations needing to operate on all the objects is greater than zero, and the effort to refactor into components is usually similar to the effort to create a working templated operation.
+
+Without classes to define boundaries, the table-based approach levels the playing field for data to be manipulated together. In all cases on our journey through normalising the level data, we have made it so changes to the design require fewer changes to the data, and made it so data changes are less likely to cause the state to become inconsistent. In many cases, it would seem we have added complexity when it wasn't necessary, and that's up to experimentation and experience to help you decide how far to go. 
+
 \subsection{Operations}
 \subsection{Summing Up}
 \subsection{Stream Processing}
