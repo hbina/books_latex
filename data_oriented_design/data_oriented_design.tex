@@ -1,6 +1,7 @@
 \documentclass[a4paper,12pt]{book}
 \usepackage[a4paper, total={6in, 6in}]{geometry}
 \usepackage[utf8]{inputenc}
+\usepackage{listings}
 
 \author{Hanif Bin Ariffin rewrites}
 \title{Data Oriented Design}
@@ -604,21 +605,241 @@ Table (TODO :: TABLE) shows the result of the transformation, and note we no lon
 \subsubsection{Domain Key/Knowledge}
 \subsubsection{Reflections}
 
-What we see here as we normalise our data is a tendency to split data by dependency. Looking at many third party engines and APIs, you can see some parallels with the results of these normalisations. It's unlikely that the people involved in the design and evolution of these engines took their data and applied database normalisation techniques, but sometimes the separations between object and components of objects can be obvious enough that you don't need a formal technique in order to realise some positive structural changes.
+What we see here as we normalise our data is a tendency to split data by dependency.
+Looking at many third party engines and APIs, you can see some parallels with the results of these normalisations.
+It's unlikely that the people involved in the design and evolution of these engines took their data and applied database normalisation techniques, but sometimes the separations between object and components of objects can be obvious enough that you don't need a formal technique in order to realise some positive structural changes.
 
-In some games, the entity object is not just an object that can be anything, but is instead a specific subset of the types of entity involved in the game. For example, in one game there might be a class for the player character, and one for each major type of enemy character, and another for vehicles. The player may have different attributes to other entities, such as lacking AI controls, or having player controls, or having regenerating health, or having ammo. This object-oriented approach puts a line, invisible to the user, but intrusive to the developer, between classes of object and their instances. It is intrusive because when classes touch, they have to adapt to each other. When they don't reside in the same hierarchy, they have to work through abstraction layers to message each other. The amount of code required to bridge these gaps can be small, but they always introduce complexity.
+In some games, the entity object is not just an object that can be anything, but is instead a specific subset of the types of entity involved in the game.
+For example, in one game there might be a class for the player character, and one for each major type of enemy character, and another for vehicles.
+The player may have different attributes to other entities, such as lacking AI controls, or having player controls, or having regenerating health, or having ammo.
+This object-oriented approach puts a line, invisible to the user, but intrusive to the developer, between classes of object and their instances.
+It is intrusive because when classes touch, they have to adapt to each other.
+When they don't reside in the same hierarchy, they have to work through abstraction layers to message each other.
+The amount of code required to bridge these gaps can be small, but they always introduce complexity.
 
-When developing software, this usually manifests as time spent writing out templated code that can operate on multiple classes rather than refactoring the classes involved into more discrete components. This could be considered wasted time as the likelihood of other operations needing to operate on all the objects is greater than zero, and the effort to refactor into components is usually similar to the effort to create a working templated operation.
+When developing software, this usually manifests as time spent writing out templated code that can operate on multiple classes rather than refactoring the classes involved into more discrete components.
+This could be considered wasted time as the likelihood of other operations needing to operate on all the objects is greater than zero, and the effort to refactor into components is usually similar to the effort to create a working templated operation.
 
-Without classes to define boundaries, the table-based approach levels the playing field for data to be manipulated together. In all cases on our journey through normalising the level data, we have made it so changes to the design require fewer changes to the data, and made it so data changes are less likely to cause the state to become inconsistent. In many cases, it would seem we have added complexity when it wasn't necessary, and that's up to experimentation and experience to help you decide how far to go. 
+Without classes to define boundaries, the table-based approach levels the playing field for data to be manipulated together.
+In all cases on our journey through normalising the level data, we have made it so changes to the design require fewer changes to the data, and made it so data changes are less likely to cause the state to become inconsistent.
+In many cases, it would seem we have added complexity when it wasn't necessary, and that's up to experimentation and experience to help you decide how far to go.
 
 \subsection{Operations}
+
+When you use objects, you call methods on them, so how do you unlock a door in this table-based approach?
+Actions are always going to be insert, delete, or updates.
+These were clearly specified in Edgar F. Codd's works, and they are all you need to manipulate a relational model.
+
+In a real database, finding what mesh to load, or whether a door is locked would normally require a join between tables.
+A real database would also attempt to optimise the join by changing the sequence of operations until it had made the smallest possible expected workload.
+We can do better than that because we can take absolute charge of how we look at and request data from our tables.
+To find out if a door is locked, we don't need to join tables, we know we can look up into the locked doors table directly.
+Just because the data is laid out like a database, doesn't mean we have to use a query language to access it.
+
+When it comes to operations that change state, it's best to try to stick to the kind of operation you would normally find in a DBMS, as doing unexpected operations brings unexpected state complexity.
+For example, imagine you have a table of doors that are open, and a table of doors that are closed.
+Moving a door from one table might be considered wasteful, so you may consider changing the representation to a single table, but with all closed doors at one end, and all open at the other.
+By having both tables represented as a single table, and having the isClosed attribute defined implicitly by a cut-off point in the array, such as in listing [TODO :: LISTING], leads to the table being somewhat ordered.
+This type of memory optimisation comes at a price.
+Introducing order into a table makes the whole table inherently less parallelisable to operations, so beware the additional complexity introduced by making changes like this, and document them well.
+
+\begin{lstlisting}{language=c++}
+      typedef std::pair<int, int> Door;
+      typedef std::vector<Door> DoorVector;
+      
+      AddClosedDoor(Door d)
+      {
+          gDoors.push_back();
+      }
+      AddOpenDoor(Door d)
+      {
+          gDoors.insert(
+                gDoors.begin() + gDoors_firstClosedDoor, d);
+          gDoors_firstClosedDoors += 1;
+      }
+\end{lstlisting}
+
+Unlocking a door can be a delete.
+A door is locked because there is an entry in the \texttt{LockedDoors} table that matches the \texttt{Door} you are interested in.
+Unlocking a door is a delete if door matches, and you have the right key.
+
+The player inventory would be a table with just \texttt{PickupID}s.
+This is the idea that ``the primary key is also the data'' mentioned much earlier.
+If the player enters a room and picks up a \texttt{Pickup}, then the entry matching the room is deleted while the inventory is updated to include the new \texttt{PickupID}.
+
+Databases have the concept of triggers, whereupon operations on a table can cause cascades of further operations.
+In the case of picking up a key, we would want a trigger on insert into the inventory that joined the new \texttt{PickupID} with the \texttt{LockedDoors} table.
+For each matching row there, delete it, and now the door is unlocked.
+
 \subsection{Summing Up}
+
+At this point we can see it is perfectly reasonable to store any highly complex data structures in a database format, even game data with its high interconnectedness and rapid design changing criteria.
+
+Games have lots of state, and the relational model provides a strong structure to hold both static information, and mutable state. The strong structure leads to similar solutions to similar problems in practise, and similar solutions have similar processing. You can expect algorithms and techniques to be more reusable while working with tables, as the data layout is less surprising.
+
+If you're looking for a way to convert your interconnected complicated objects into a simpler flatter memory layout, you could do worse than approach the conversion with normalisation in mind.
+
+A database approach to data storage has some other useful side-effects. It provides an easier route to allowing old executables to run off new data, and it allows new executables to more easily run with old data. This can be vital when working with other people who might need to run an earlier or later version. We saw that sometimes adding new features required nothing more than adding a new table, or a new column to an existing table. That's a non-intrusive modification if you are using a database style of storage, but a significant change if you're adding a new member to a class.
+
 \subsection{Stream Processing}
+
+Now we realise that all the game data and game runtime can be implemented in a database-like approach, we can also see that all game data can be implemented as streams. Our persistent storage is a database, our runtime data is in the same format as it was on disk, what do we benefit from this? Databases can be thought of as collections of rows, or collections of columns, but it's also possible to think about the tables as sets. The set is the set of all possible permutations of the attributes.
+
+For most applications, using a bitset to represent a table would be wasteful, as the set size quickly grows out of scope of any hardware, but it can be interesting to note what this means from a processing point of view. Processing a set, transforming it into another set, can be thought of as traversing the set and producing the output set, but the interesting attribute of a set is that it is unordered. An unordered list can be trivially parallel processed. There are massive benefits to be had by taking advantage of this trivialisation of parallelism wherever possible, and we normally cannot get near this because of the data layout of the object-oriented approaches.
+
+Coming at this from another angle, graphics cards vendors have been pushing in this direction for many years, and we now need to think in this way for game logic too. We can process lots of data quickly as long as we utilise stream processing or set processing as much as possible and use random access processing as little as possible. Stream processing in this case means to process data without writing to variables external to the process. This means not allowing things like global accumulators, or accessing global memory not set as a source for the process. This ensures the processes or transforms are trivially parallelisable.
+
+When you prepare a primitive render for a graphics card, you set up constants such as the transform matrix, the texture binding, any lighting values, or which shader you want to run. When you come to run the shader, each vertex and pixel may have its own scratchpad of local variables, but they never write to globals or refer to a global scratchpad. The concept of shared memory in general purpose GPU code, such as CUDA and OpenCL, allows the use of a kind of managed cache. None of the GPGPU techniques offer access to global memory, and thus maintain a clear separation of domains and continue to guarantee no side-effects caused by any kernels being run outside of their own sandboxed shared memory. By enforcing this lack of side-effects, we can guarantee trivial parallelism because the order of operations are assured to be irrelevant. If a shader was allowed to write to globals, there would be locking, or it would become an inherently serial operation. Neither of these are good for massive core count devices like graphics cards, so that has been a self imposed limit and an important factor in their design. Adding shared memory to the mix starts to inject some potential locking into the process, and hence is explicitly only used when writing compute shaders.
+
+Doing all processing this way, without globals / global scratchpads, gives you the rigidity of intention to highly parallelise your processing and make it easier to think about the system, inspect it, debug it, and extend it or interrupt it to hook in new features. If you know the order doesn't matter, it's very easy to rerun any tests or transforms that have caused bad state.
+
 \subsection{Why Does Database Technology Matter?}
+
+As mentioned at the start of the chapter, the relational model is currently a very good fit for developing non-sparse data layouts that are manipulable with very little complicated state management required once the tables have been designed. However, the only constant is change. That which is current, regularly becomes the old way, and for widely scaled systems, the relational model no longer provides all features required.
+
+After the emergence of NoSQL solutions for handling even larger workloads, and various large companies' work on creating solutions to distribute computing power, there have been advances in techniques to process enormous data-sets. There have been advances in how to keep databases current, distributed, and consistent (within tolerance). Databases now regularly include NULL entries, to the point where there are far more NULL entries than there are values, and these highly sparse databases need a different solution for processing. Many large calculations and processes now run via a technique called map-reduce, and distributing workloads has become commonplace enough that people have to be reminded they don't always need a cluster to add up some numbers.
+
+What's become clear over the last decade is that most of the high-level data processing techniques which are proving to be useful are a combination of hardware-aware data manipulation layers being used by functional programming style high-level algorithms. As the hardware in your PC becomes more and more like the internet itself, these techniques will begin to dominate on personal hardware, whether it be personal computers, phones, or whatever the next generation brings. Data-oriented design was inspired by a realisation that the hardware had moved on to the point where the techniques we used to use to defend against latency from CPU to hard drive, now apply to memory. In the future, if we raise processing power by the utilisation of hoards of isolated unreliable computation units, then the techniques for distributing computing across servers that we're developing in this era, will apply to the desktops of the next.
+
 \section{Existential Processing}
+
+If you saw there weren't any apples in stock, would you still haggle over their price?
+
+Existential processing attempts to provide a way to remove unnecessary querying about whether or not to process your data.
+In most software, there are checks for NULL and queries to make sure the objects are in a valid state before work is started.
+What if you could always guarantee your pointers were not null?
+What if you were able to trust that your objects were in a valid state, and should always be processed?
+
+In this chapter, a dynamic runtime polymorphism technique is shown that can work with the data-oriented design methodology.
+It is not the only way to implement data-oriented design friendly runtime polymorphism, but was the first solution discovered by the author, and fits well with other game development technologies, such as components and compute shaders.
+
 \subsection{Complexity}
+
+When studying software engineering you may find references to cyclomatic complexity or conditional complexity.
+This is a complexity metric providing a numeric representation of the complexity of programs and is used in analysing large-scale software projects.
+Cyclomatic complexity concerns itself only with flow control.
+The formula, summarised for our purposes, is one (1) plus the number of conditionals present in the system being analysed.
+That means for any system it starts at one, and for each if, while, for, and do-while, we add one.
+We also add one per path in a switch statement excluding the default case if present.
+
+Under the hood, if we consider how a virtual call works, that is, a lookup in a function pointer table followed by a branch into the class method, we can see that a virtual call is effectively just as complex as a switch statement.
+Counting the flow control statements is more difficult in a virtual call because to know the complexity value, you have to know the number of possible methods that can fulfil the request.
+In the case of a virtual call, you have to count the number of overrides to a base virtual call.
+If the base is pure-virtual, then you may subtract one from the complexity.
+However, if you don't have access to all the code that is running, which can be possible in the case of dynamically loaded libraries, then the number of different potential code paths increases by an unknown amount.
+This hidden or obscured complexity is necessary to allow third party libraries to interface with the core process, but requires a level of trust that implies no single part of the process is ever going to be thoroughly tested.
+
+This kind of complexity is commonly called control flow complexity.
+There is another form of complexity inherent in software, and that is the complexity of state.
+In the paper \textit{Out of the Tar Pit}, it's concluded that the aspect of software which causes the most complexity is state.
+The paper continues and presents a solution which attempts to minimise what it calls accidental state, that is, state which is required by the software to do its job, but not directly required by the problem being solved.
+The solution also attempts to abolish any state introduced merely to support a programming style.
+
+We use flow control to change state, and state changes what is executed in our programs.
+In most cases flow control is put in for one of two reasons :
+to solve the problem presented (which is equivalent to the essential state in \textit{Out of the Tar Pit}), and to help with the implementation of the solution (which is equivalent to the accidental state).
+
+Essential control is when we need to implement the design, a gameplay feature which has to happen when some conditions are met, such as jumping when the jump button is pressed or autosaving at a save checkpoint when the savedata is dirty, or a timer has run out.
+
+Accidental control is non-essential to the program from the point of view of the person using it, but could be foundation work, making it critical for successful program creation.
+This type of control complexity is itself generally split into two forms.
+The first form is structural, such as to support a programming paradigm, to provide performance improvements, or to drive an algorithm.
+The second form is defensive programming or developer helpers such as reference counting or garbage collection.
+These techniques increase complexity where functions operating on the data aren't sure the data exists, or is making sure bounds are observed.
+In practice, you will find this kind of control complexity when using containers and other structures, control flow is going to be in the form of bounds checks and ensuring data has not gone out of scope.
+Garbage collection adds complexity.
+In many languages, there are few guarantees about how and when it will happen.
+This also means it can be hard to reason about object lifetimes.
+Because of a tendency to ignore memory allocations early in development when working with these languages, it can be very hard to fix memory leaks closer to shipping dates.
+Garbage collection in unmanaged languages is easier to handle, as reference counts can more easily be interrogated, but also due to the fact that unmanaged languages generally allocate less often in the first place.
+
 \subsection{Debugging}
+
+What classes of issues do we suffer with high complexity programs?
+Analysing the complexity of a system helps us understand how difficult it is to test, and in turn, how hard it is to debug.
+Some issues can be classified as being in an unexpected state, and then having no way forward.
+Others can be classified as having bad state, and then exhibiting unexpected behaviour due to reacting to this invalid data.
+Yet others can be classified as performance problems, not just correctness, and these issues, though somewhat disregarded by a large amount of academic literature, are costly in practice and usually come from complex dependencies of state.
+
+For example, the complexity caused by performance techniques such as caching, are issues of complexity of state.
+The CPU cache is in a state, and not being aware of it, and not working with the expected state in mind, leads to issues of poor or inconsistent performance.
+
+Much of the time, the difficulty we have in debugging comes from not fully observing all the flow control points, assuming one route has been taken when it hasn't.
+When programs do what they are told, and not what we mean, they will have entered into a state we had not expected or prepared for.
+
+With runtime polymorphism using virtual calls, the likelihood of that happening can dramatically increase as we cannot be sure we know all the different ways the code can branch until we either litter the code with logging, or step through in a debugger to see where it goes at run-time.
+
 \subsection{Why Use An If}
+
+In real-world cases of game development, the most common use of an explicit flow control statement would appear to be in the non-essential set.
+Where defensive programming is being practiced, many of the flow control statements are just to stop crashes.
+There are fail-safes for out of bounds accesses, protection from pointers being NULL, and defenses against other exceptional cases that would bring the program to a halt.
+It's pleasing to note, GitHub contains plenty of high quality C++ source-code that bucks this trend, preferring to work with reference types, or with value types where possible.
+In game development, another common form of flow control is looping.
+Though these are numerous, most compilers can spot them, and have good optimisations for these and do a very good job of removing condition checks that aren't necessary.
+The final inessential but common flow control comes from polymorphic calls, which can be helpful in implementing some of the gameplay logic, but mostly are there to entertain the do-more-with-less-code development model partially enforced in the object-oriented approach to writing games.
+
+Essential game design originating flow control doesn't appear very often in profiles as causes of branching, as all the supporting code is run far more frequently.
+This can lead to an underappreciation of the effect each conditional has on the performance of the software.
+Code that does use a conditional to implement AI or handle character movement, or decide on when to load a level, will be calling down into systems which are full of loops and tree traversals, or bounds checks on arrays they are accessing in order to return the data upon which the game is going to produce the boolean value to finally drive the side of the if to which it will fall through.
+That is, when the rest of your code-base is slow, it's hard to validate writing fast code for any one task.
+It's hard to tell what additional costs you're adding on.
+
+If we decide the elimination of control flow is a goal worthy of consideration, then we must begin to understand what control flow operations we can eliminate.
+If we begin our attempt to eliminate control flow by looking at defensive programming, we can try to keep our working set of data as a collections of arrays.
+This way we can guarantee none of our data will be NULL.
+That one step alone may eliminate many of our flow control statements.
+It won't get rid of loops, but as long as they are loops over data running a pure functional style transform, then there are no side-effects to worry about, and it will be easier to reason about.
+
+The inherent flow control in a virtual call is avoidable, as it is a fact that many programs were written in a non-object-oriented style.
+Without virtuals, we can rely on switch statements.
+Without those, we can rely on function pointer tables.
+Without those, we can have a long sequence of ifs.
+There are many ways to implement runtime polymorphism.
+It is also possible to maintain that if you don't have an explicit type, you don't need to switch on it, so if you can eradicate the object-oriented approach to solving the problem, those flow control statements go away completely.
+
+When we get to the control flow in gameplay logic, we find there is no simple way to eradicate it.
+This is not a terrible thing to worry about, as the gameplay logic is as close to essential complexity as we can get when it comes to game development.
+
+Reducing the number of conditionals, and thus reducing the cyclomatic complexity on such a scale is a benefit which cannot be overlooked, but it is one that comes with a cost.
+The reason we are able to get rid of the check for NULL is that we will have our data in a format that doesn't allow for NULL at all.
+This inflexibility will prove to be a benefit, but it requires a new way of processing our entities.
+
+Where once we would have an object instance for an area in a game, and we would interrogate it for exits that take us to other areas, now we look into a structure that only contains links between areas, and filter by the area we are in.
+This reversal of ownership can be a massive benefit in debugging, but can sometimes appear backward when all you want to do is find out what exits are available to get out of an area.
+
+If you've ever worked with shopping lists or to-do lists, you'll know how much more efficient you can be when you have a definite list of things to purchase or complete.
+It's very easy to make a list, and adding to it is easy as well.
+If you're going shopping, it's very hard to think what might be missing from your house in order to get what you need.
+If you're the type that tries to plan meals, then a list is nigh on essential as you figure out ingredients and then tally up the number of tins of tomatoes, or other ingredients you need to last through all the meals you have planned.
+If you have a to-do list and a calendar, you know who is coming and what needs to be done to prepare for them.
+You know how many extra mouths need feeding, how much food and drink you need to buy, and how much laundry you need done to make enough beds for the visitors.
+
+To-do lists are great because you can set an end goal and then add in subtasks that make a large and long distant goal seem more doable.
+Adding in estimates can provide a little urgency that is usually missing when the deadline is so far away.
+Many companies use software to support tracking of tasks, and this software often comes with features allowing the producers to determine critical paths, expected developer hours required, and sometimes even the balance of skills required to complete a project.
+Not using this kind of software is often a sign that a company isn't overly concerned with efficiency, or waste.
+If you're concerned about efficiency and waste in your program, lists of tasks seem like a good way to start analysing where the costs are coming from.
+If you keep track of these lists by logging them, you can look at the data and see the general shape of the processing your software is performing.
+Without this, it can be difficult to tell where the real bottlenecks are, as it might not be the processing that is the problem, but the requirement to process data itself which has gotten out of hand.
+
+When your program is running, if you don't give it homogeneous lists to work with, but instead let it do whatever comes up next, it will be inefficient and have irregular or lumpy frame timings.
+Inefficiency of hardware utilisation often comes from unpredictable processing.
+In the case of large arrays of pointers to heterogeneous classes all being called with an update() function, you can hit high amounts of data dependency which leads to misses in both data and instruction caches.
+See chapter [TODO :: LINK] for more details on why.
+
+Slowness also comes from not being able to see how much work needs to be done, and therefore not being able to prioritise or scale the work to fit what is possible within the given time-frame. Without a to-do list, and an ability to estimate the amount of time each task will take, it is difficult to decide the best course of action to take in order to reduce overhead while maintaining feedback to the user.
+
+Object-oriented programming works very well when there are few patterns in the way the program runs. When either the program is working with only a small amount of data, or when the data is incredibly heterogeneous, to the point that there are as many classes of things as there are things.
+
+Irregular frame timings can often be blamed on not being able to act on distant goals ahead of time. If you, as a developer, know you have to load the assets for a new island when a player ventures into the seas around it, the streaming system can be told to drag in any data necessary. This could also be for a room and the rooms beyond. It could be for a cave or dungeon when the player is within sight of the entrance. We consider this kind of preemptive streaming of data to be a special case and invent systems to provide this level of forethought. Relying on humans, or even level-designers, to link these together is prone to error. In many cases, there are chains of dependencies that can be missed without an automated check. The reason we cannot make systems self-aware enough to preload themselves is that we don't have a common language to describe temporal dependencies.
+
+In many games, we stream things in with explicit triggers, but there is often no such system for many of the other game elements. It's virtually unheard of for an AI to pathfind to some goal because there might soon be a need to head that way. The closest would be for the developer to pre-populate a navigation map so coarse grain pathing can be completed swiftly.
+
+There's also the problem of depth of preemptive work. Consider the problem of a small room, built as a separate asset, a waiting room with two doors near each other, both leading to large, but different maps. When the player gets near the door to the waiting room in map A, that little room can be preemptively streamed in. However, in many engines, map B won't be streamed in, as the locality of map B to map A is hidden behind the logical layer of the waiting room.
+
+It's also not commonplace to find a physics system doing look ahead to see if a collision has happened in the future in order to start doing further work. It might be possible to do a more complex breakup simulation if it were more aware.
+
+If you let your game generate to-do lists, shopping lists, distant goals, and allow for preventative measures by forward-thinking, then you can simplify your task as a coder into prioritising goals and effects, or writing code that generates priorities at runtime. You can start to think about how to chain those dependencies to solve the waiting room problem. You can begin to preempt all types of processing.
 
 \end{document}
