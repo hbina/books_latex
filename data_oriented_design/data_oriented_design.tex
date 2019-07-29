@@ -1297,7 +1297,23 @@ Listing [TODO :: REFER LISTINGS BELOW THAT HAVE NO ENTITIES] shows a rough examp
 [TODO :: LISTINGS OF CODE WITHOUT ANY ENTITIES]
 
 Moving away from compile-time defined classes means many other classes can be invented without adding much code.
- Allowing scripts to generate new classes of entity by composition or prototyping increases their power dramatically, and cleanly increase the apparent complexity of the game without adding more actual complexity.
-  Finally, all the different entities in the game will now run the same code at the same time, which simplifies and centralises your processing code, leading to more opportunity to share optimisations, and fewer places for bugs to hide
+Allowing scripts to generate new classes of entity by composition or prototyping increases their power dramatically, and cleanly increase the apparent complexity of the game without adding more actual complexity.
+Finally, all the different entities in the game will now run the same code at the same time, which simplifies and centralises your processing code, leading to more opportunity to share optimisations, and fewer places for bugs to hide
+
+\section{Hierarchical Level of Detail and Implicit-State}
+
+Consoles and graphics cards are not generally bottlenecked at the polygon rendering stage in the pipeline.
+Usually, they are bandwidth bound.
+ If there is a lot of alpha blending, it's often fill-rate issues.
+  For the most part, graphics chips spend a lot of their time reading textures, and texture bandwidth often becomes the bottleneck.
+   Because of this, the old way of doing level of detail with multiple meshes with decreasing numbers of polygons is never going to be as good as a technique which takes into account the actual data required of the level of detail used in each renderable.
+    The vast majority of stalls when rendering come from driver side processing, or from processing too much for what you want to actually render.
+     Hierarchical level of detail can fix the problem of high primitive count which causes more driver calls than necessary.
+
+The basic approach for art is to make optimisations by grouping and merging many low level of detail meshes into one single low level of detail mesh.
+ This reduces the time spent in the setup of render calls which is beneficial in situations where driver calls are costly.
+  In a typical very large scale environment, a hierarchical level of detail approach to game content can reduce the workload on a game engine by an order of magnitude as the number of entities in the scene considered for processing and rendering drops significantly.
+
+Even though the number of polygons rendered may be exactly the same, or maybe even higher, the fact that the engine usually is only handling roughly the same number of entities at once on average increases stability and allows for more accurately targeted optimisations of both art and code.
 
 \end{document}
