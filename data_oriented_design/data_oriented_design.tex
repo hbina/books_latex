@@ -1280,8 +1280,24 @@ The main cost was in moving between the different areas of code, but even withou
 
 What happens when we let more than just the player use these arrays?
 Normally we'd have some separate logic for handling player fire until we refactored the weapons to be generic weapons with NPCs using the same code for weapons probably by having a new weapon class that can be pointed to by the player or an NPC, but instead what we have here is a way to split off the weapon firing code in such a way as to allow the player and the NPC to share firing code without inventing a new class to hold the firing.
- In fact, what we've done is split the firing up into the different tasks it really contains.
+In fact, what we've done is split the firing up into the different tasks it really contains.
 
 Tasks are good for parallel processing, and with component based objects, we open up the opportunity to move most of our previously class oriented processes out, and into more generic tasks that can be dished out to whatever CPU or co-processor can handle them.
+
+\subsection{There Is No Entity}
+
+What happens when we completely remove the Player class?
+If an entity can be represented by its collection of components, does it need any further identity than those self same components?
+Like the values in the rows of a table, the components describe a single instance, but also like the rows in a table, the table is also a set.
+In the universe of possibilities of component combinations, the components which make up the entity are not facts about the entity, but are the entity, and are the only identity the entity needs.
+As an entity is its current configuration of components, then there is the possibility of removing the core Player class completely.
+Removing this class can mean we no longer think of the player as being the centre of the game, but because the class no longer exists, it means the code is no longer tied to a specific singular entity.
+Listing [TODO :: REFER LISTINGS BELOW THAT HAVE NO ENTITIES] shows a rough example of how you might develop this kind of setup.
+
+[TODO :: LISTINGS OF CODE WITHOUT ANY ENTITIES]
+
+Moving away from compile-time defined classes means many other classes can be invented without adding much code.
+ Allowing scripts to generate new classes of entity by composition or prototyping increases their power dramatically, and cleanly increase the apparent complexity of the game without adding more actual complexity.
+  Finally, all the different entities in the game will now run the same code at the same time, which simplifies and centralises your processing code, leading to more opportunity to share optimisations, and fewer places for bugs to hide
 
 \end{document}
