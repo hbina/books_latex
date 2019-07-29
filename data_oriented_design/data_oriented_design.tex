@@ -1200,13 +1200,58 @@ We shall use listing [TODO :: REFER TO LISTINGS SHOWING BASE OOP CLASS TO BE DIS
 [TODO :: LISTINGS OF AN OOP CLASS TO BE DISSECTED]
 
 This example class includes many of the types of things found in games, where the codebase has grown organically.
- It's common for the Player class to have lots of helper functions to make writing game code easier.
-  Helper functions typically consider the Player as an instance in itself, from data in save through to rendering on screen.
-   It's not unusual for the Player class to touch nearly every aspect of a game, as the human player is the target of the code in the first place, the Player class is going to reference nearly everything too.
+It's common for the Player class to have lots of helper functions to make writing game code easier.
+Helper functions typically consider the Player as an instance in itself, from data in save through to rendering on screen.
+It's not unusual for the Player class to touch nearly every aspect of a game, as the human player is the target of the code in the first place, the Player class is going to reference nearly everything too.
 
 AI characters will have similarly gnarly looking classes if they are generalised rather than specialised.
- Specialising AI was more commonplace when games needed to fit in smaller machines, but now, because the Player class has to interact with many of them over the course of the game, they tend to be unified into one type just like the player, if not the same as the player, to help simplify the code that allows them to interact.
-  As of writing, the way in which AI is differentiated is mostly by data, with behaviour trees taking the main stage for driving how AI thinks about its world.
-   Behaviour trees are another concept subject to various interpretations, so some forms are data-oriented design friendly, and others are not.
+Specialising AI was more commonplace when games needed to fit in smaller machines, but now, because the Player class has to interact with many of them over the course of the game, they tend to be unified into one type just like the player, if not the same as the player, to help simplify the code that allows them to interact.
+As of writing, the way in which AI is differentiated is mostly by data, with behaviour trees taking the main stage for driving how AI thinks about its world.
+Behaviour trees are another concept subject to various interpretations, so some forms are data-oriented design friendly, and others are not.
+
+\subsection{Away From Hierarchies}
+
+A recurring theme in articles and post-mortems from people moving from object-oriented hierarchies of gameplay classes to a component based approach is the transitional states of turning their classes into containers of smaller objects, an approach often called composition.
+This transitional form takes an existing class and finds the boundaries between concepts internal to the class and attempts to refactor them out into new classes which can be owned or pointed to by the original class.
+From our monolithic player class, we can see there are lots of things that are not directly related, but that does not mean they are not linked together.
+
+Object-oriented hierarchies are is-a relationships, and components and composition oriented designs are traditionally thought of as has-a relationships.
+Moving from one to the other can be thought of as delegating responsibility or moving away from being locked into what you are, but having a looser role and keeping the specialisation until further down the tree.
+Composition clears up most of the common cases of diamond inheritance issues, as capabilities of the classes are added by accretion as much as they are added by overriding.
+
+The first move we need to make will be to take related pieces of our monolithic class and move them into their own classes, along the lines of composing, changing the class from owning all the data and the actions that modify the data into having instances which contain data and delegating actions down into those specialised structures where possible.
+We move the data out into separate structures so they can be more easily combined into new classes later.
+We will initially only separate by categories we perceive as being the boundaries between systems.
+For example, we separate rendering from controller input, from gameplay details such as inventory, and we split out animation from all.
+
+Taking a look at the results of splitting the player class up, such as in listing [TODO :: REFER LISTINGS SHOWING THE MODIFIED OOP CLASS], it's possible to make some initial assessments of how this may turn out.
+We can see how a first pass of building a class out of smaller classes can help organise the data into distinct, purpose oriented collections, but we can also see the reason why a class ends up being a tangled mess.
+When you think about the needs of each of the pieces, what their data requirements are, the coupling can become evident.
+The rendering functions need access to the player's position as well as the model, and the gameplay functions such as Shoot(Vec target) need access to the inventory as well as setting animations and dealing damage.
+Taking damage will need access to the animations and health.
+Things are already seeming more difficult to handle than expected, but what's really happening here is that it's becoming clear that code needs to cut across different pieces of data.
+With just this first pass, we can start to see that functionality and data don't belong together.
+
+[TODO :: LISTINGS SHOWING THE MODIFIED OOP CLASS]
+
+In this first step, we made the player class a container for the components.
+ Currently, the player has the components, and the player class has to be instantiated to make a player exist.
+  To allow for the cleanest separation into components in the most reusable way, it's worth attempting to move components into being managed by managers, and not handled or updated by their entities.
+   In doing this, there will also be a benefit of cache locality when we're iterating over multiple entities doing related tasks when we move them away from their owners.
+
+This is where it gets a bit philosophical.
+ Each system has an idea of the data it needs in order to function, and even though they will overlap, they will not share all data.
+  Consider what it is that a serialisation system needs to know about a character.
+   It is unlikely to care about the current state of the animation system, but it will care about inventory.
+    The rendering system will care about position and animation, but won't care about the current amount of ammo.
+     The UI rendering code won't even care about where the player is, but will care about inventory and their health and damage.
+      This difference of interest is at the heart of why putting all the data in one class isn't a good long-term solution.
+
+The functionality of a class, or an object, comes from how the internal state is interpreted, and how the changes to state over time are interpreted too.
+ The relationship between facts is part of the problem domain and could be called meaning, but the facts are only raw data.
+  This separation of fact from meaning is not possible with an object-oriented approach, which is why every time a fact acquires a new meaning, the meaning has to be implemented as part of the class containing the fact.
+   Dissolving the class, extracting the facts and keeping them as separate components, has given us the chance to move away from classes that instill permanent meaning at the expense of occasionally having to look up facts via less direct methods.
+    Rather than store all the possibly associated data by meaning, we choose to only add meaning when necessary.
+     We add meaning when it is part of the immediate problem we are trying to solve.
 
 \end{document}
