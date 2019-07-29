@@ -1235,23 +1235,53 @@ With just this first pass, we can start to see that functionality and data don't
 [TODO :: LISTINGS SHOWING THE MODIFIED OOP CLASS]
 
 In this first step, we made the player class a container for the components.
- Currently, the player has the components, and the player class has to be instantiated to make a player exist.
-  To allow for the cleanest separation into components in the most reusable way, it's worth attempting to move components into being managed by managers, and not handled or updated by their entities.
-   In doing this, there will also be a benefit of cache locality when we're iterating over multiple entities doing related tasks when we move them away from their owners.
+Currently, the player has the components, and the player class has to be instantiated to make a player exist.
+To allow for the cleanest separation into components in the most reusable way, it's worth attempting to move components into being managed by managers, and not handled or updated by their entities.
+In doing this, there will also be a benefit of cache locality when we're iterating over multiple entities doing related tasks when we move them away from their owners.
 
 This is where it gets a bit philosophical.
- Each system has an idea of the data it needs in order to function, and even though they will overlap, they will not share all data.
-  Consider what it is that a serialisation system needs to know about a character.
-   It is unlikely to care about the current state of the animation system, but it will care about inventory.
-    The rendering system will care about position and animation, but won't care about the current amount of ammo.
-     The UI rendering code won't even care about where the player is, but will care about inventory and their health and damage.
-      This difference of interest is at the heart of why putting all the data in one class isn't a good long-term solution.
+Each system has an idea of the data it needs in order to function, and even though they will overlap, they will not share all data.
+Consider what it is that a serialisation system needs to know about a character.
+It is unlikely to care about the current state of the animation system, but it will care about inventory.
+The rendering system will care about position and animation, but won't care about the current amount of ammo.
+The UI rendering code won't even care about where the player is, but will care about inventory and their health and damage.
+This difference of interest is at the heart of why putting all the data in one class isn't a good long-term solution.
 
 The functionality of a class, or an object, comes from how the internal state is interpreted, and how the changes to state over time are interpreted too.
- The relationship between facts is part of the problem domain and could be called meaning, but the facts are only raw data.
-  This separation of fact from meaning is not possible with an object-oriented approach, which is why every time a fact acquires a new meaning, the meaning has to be implemented as part of the class containing the fact.
-   Dissolving the class, extracting the facts and keeping them as separate components, has given us the chance to move away from classes that instill permanent meaning at the expense of occasionally having to look up facts via less direct methods.
-    Rather than store all the possibly associated data by meaning, we choose to only add meaning when necessary.
-     We add meaning when it is part of the immediate problem we are trying to solve.
+The relationship between facts is part of the problem domain and could be called meaning, but the facts are only raw data.
+This separation of fact from meaning is not possible with an object-oriented approach, which is why every time a fact acquires a new meaning, the meaning has to be implemented as part of the class containing the fact.
+Dissolving the class, extracting the facts and keeping them as separate components, has given us the chance to move away from classes that instill permanent meaning at the expense of occasionally having to look up facts via less direct methods.
+Rather than store all the possibly associated data by meaning, we choose to only add meaning when necessary.
+We add meaning when it is part of the immediate problem we are trying to solve.
+
+\subsection{Toward Managers}
+
+[TODO :: LISITNGS SHOWING MANAGERS + CLASSES]
+
+After splitting your classes up into components, you might find your classes look more awkward now they are accessing variables hidden away in new structures.
+But it's not your classes that should be looking up variables, but instead transforms on the classes.
+A common operation such as rendering requires the position and the model information, but it also requires access to the renderer.
+Such object boundary crossing access is seen as a compromise during game development, but here it can be seen as the method by which we move away from a class-centric approach to a data-oriented approach.
+We will aim at transforming our data into render requests which affect the graphics pipeline without referring to data unimportant to the renderer.
+
+Referring to listing [TODO :: REFER LISTINGS ABOVE SHOWING MANAGERS], we move to no longer having a player update, but instead an update for each component that makes up the player.
+This way, everyone entity's physics is updated before it is rendered, or could be updated while the rendering is happening on another thread.
+All entity's controls (whether they be player or AI) can be updated before they are animated.
+Having the managers control when the code is executed is a large part of the leap towards fully parallelisable code.
+This is where performance can be gained with more confidence that it's not negatively impacting other areas.
+Analysing which components need updating every frame, and which can be updated less frequently leads to optimisations that unlock components from each other.
+
+In many component systems that allow scripting languages to define the actions taken by components or their entities, performance can fall foul of the same inefficiencies present in an object-oriented program design.
+Notably, the dependency inversion practice of calling Tick or Update functions will often have to be sandboxed in some way which will lead to error checking and other safety measures wrapping the internal call.
+There is a good example of this being an issue with the older versions of Unity, where their component based approach allowed every instance to have its own script which would have its own call from the core of Unity on every frame.
+The main cost appeared to be transitioning in and out of the scripting language, crossing the boundary between the C++ at the core, and the script that described the behaviour of the component.
+In his article 10,000 Update() calls [TODO :: REFERENCE TEN K UPDATE ARTICLE], Valentin Simonov provided information on why the move to managers makes so much sense, giving details on what is costing the most when utilising dependency inversion to drive your general code update strategies.
+The main cost was in moving between the different areas of code, but even without having to straddle the language barrier, managers make sense as they ensure updates to components happen in sync.
+
+What happens when we let more than just the player use these arrays?
+Normally we'd have some separate logic for handling player fire until we refactored the weapons to be generic weapons with NPCs using the same code for weapons probably by having a new weapon class that can be pointed to by the player or an NPC, but instead what we have here is a way to split off the weapon firing code in such a way as to allow the player and the NPC to share firing code without inventing a new class to hold the firing.
+ In fact, what we've done is split the firing up into the different tasks it really contains.
+
+Tasks are good for parallel processing, and with component based objects, we open up the opportunity to move most of our previously class oriented processes out, and into more generic tasks that can be dished out to whatever CPU or co-processor can handle them.
 
 \end{document}
