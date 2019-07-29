@@ -828,18 +828,85 @@ Inefficiency of hardware utilisation often comes from unpredictable processing.
 In the case of large arrays of pointers to heterogeneous classes all being called with an update() function, you can hit high amounts of data dependency which leads to misses in both data and instruction caches.
 See chapter [TODO :: LINK] for more details on why.
 
-Slowness also comes from not being able to see how much work needs to be done, and therefore not being able to prioritise or scale the work to fit what is possible within the given time-frame. Without a to-do list, and an ability to estimate the amount of time each task will take, it is difficult to decide the best course of action to take in order to reduce overhead while maintaining feedback to the user.
+Slowness also comes from not being able to see how much work needs to be done, and therefore not being able to prioritise or scale the work to fit what is possible within the given time-frame.
+Without a to-do list, and an ability to estimate the amount of time each task will take, it is difficult to decide the best course of action to take in order to reduce overhead while maintaining feedback to the user.
 
-Object-oriented programming works very well when there are few patterns in the way the program runs. When either the program is working with only a small amount of data, or when the data is incredibly heterogeneous, to the point that there are as many classes of things as there are things.
+Object-oriented programming works very well when there are few patterns in the way the program runs.
+When either the program is working with only a small amount of data, or when the data is incredibly heterogeneous, to the point that there are as many classes of things as there are things.
 
-Irregular frame timings can often be blamed on not being able to act on distant goals ahead of time. If you, as a developer, know you have to load the assets for a new island when a player ventures into the seas around it, the streaming system can be told to drag in any data necessary. This could also be for a room and the rooms beyond. It could be for a cave or dungeon when the player is within sight of the entrance. We consider this kind of preemptive streaming of data to be a special case and invent systems to provide this level of forethought. Relying on humans, or even level-designers, to link these together is prone to error. In many cases, there are chains of dependencies that can be missed without an automated check. The reason we cannot make systems self-aware enough to preload themselves is that we don't have a common language to describe temporal dependencies.
+Irregular frame timings can often be blamed on not being able to act on distant goals ahead of time.
+If you, as a developer, know you have to load the assets for a new island when a player ventures into the seas around it, the streaming system can be told to drag in any data necessary.
+This could also be for a room and the rooms beyond.
+It could be for a cave or dungeon when the player is within sight of the entrance.
+We consider this kind of preemptive streaming of data to be a special case and invent systems to provide this level of forethought.
+Relying on humans, or even level-designers, to link these together is prone to error.
+In many cases, there are chains of dependencies that can be missed without an automated check.
+The reason we cannot make systems self-aware enough to preload themselves is that we don't have a common language to describe temporal dependencies.
 
-In many games, we stream things in with explicit triggers, but there is often no such system for many of the other game elements. It's virtually unheard of for an AI to pathfind to some goal because there might soon be a need to head that way. The closest would be for the developer to pre-populate a navigation map so coarse grain pathing can be completed swiftly.
+In many games, we stream things in with explicit triggers, but there is often no such system for many of the other game elements.
+It's virtually unheard of for an AI to pathfind to some goal because there might soon be a need to head that way.
+The closest would be for the developer to pre-populate a navigation map so coarse grain pathing can be completed swiftly.
 
-There's also the problem of depth of preemptive work. Consider the problem of a small room, built as a separate asset, a waiting room with two doors near each other, both leading to large, but different maps. When the player gets near the door to the waiting room in map A, that little room can be preemptively streamed in. However, in many engines, map B won't be streamed in, as the locality of map B to map A is hidden behind the logical layer of the waiting room.
+There's also the problem of depth of preemptive work.
+Consider the problem of a small room, built as a separate asset, a waiting room with two doors near each other, both leading to large, but different maps.
+When the player gets near the door to the waiting room in map A, that little room can be preemptively streamed in.
+However, in many engines, map B won't be streamed in, as the locality of map B to map A is hidden behind the logical layer of the waiting room.
 
-It's also not commonplace to find a physics system doing look ahead to see if a collision has happened in the future in order to start doing further work. It might be possible to do a more complex breakup simulation if it were more aware.
+It's also not commonplace to find a physics system doing look ahead to see if a collision has happened in the future in order to start doing further work.
+It might be possible to do a more complex breakup simulation if it were more aware.
 
-If you let your game generate to-do lists, shopping lists, distant goals, and allow for preventative measures by forward-thinking, then you can simplify your task as a coder into prioritising goals and effects, or writing code that generates priorities at runtime. You can start to think about how to chain those dependencies to solve the waiting room problem. You can begin to preempt all types of processing.
+If you let your game generate to-do lists, shopping lists, distant goals, and allow for preventative measures by forward-thinking, then you can simplify your task as a coder into prioritising goals and effects, or writing code that generates priorities at runtime.
+You can start to think about how to chain those dependencies to solve the waiting room problem.
+You can begin to preempt all types of processing.
+
+\subsection{Types of Programming}
+
+Existential processing is related to to-do lists.
+When you process every element in a homogeneous set of data, you know you are processing every element the same way.
+You are running the same instructions for every element in that set.
+There is no definite requirement for the output in this specification, however, it usually comes down to one of three types of operation :
+a filter, a mutation, or an emission.
+A mutation is a one to one manipulation of the data, it takes incoming data and some constants that are set up before the transform, and produces one and only one element for each input element.
+A filter takes incoming data, again with some constants set up before the transform, and produces one element or zero elements for each input element.
+An emission is a manipulation of the incoming data that can produce multiple output elements.
+Just like the other two transforms, an emission can use constants, but there is no guaranteed size of the output table;
+it can produce anywhere between zero and infinity elements.
+
+A fourth, and final form, is not really a manipulation of data, but is often part of a transform pipeline, and that is the generator.
+A generator takes no input data, but merely produces output based on the constants set up.
+When working with compute shaders, you might come across this as a function that merely clears out an array to zero, one, or an ascending sequence.
+
+[ TODO :: TABLE ]
+
+These categories can help you decide what data structure you will use to store the elements in your arrays, and whether you even need a structure, or you should instead pipe data from one stage to another without it touching down on an intermediate buffer.
+
+Every CPU can efficiently handle running processing kernels over homogeneous sets of data, that is, doing the same operation over and over again over contiguous data.
+When there is no global state, no accumulator, it is proven to be parallelisable.
+Examples can be given from existing technologies such as map-reduce and simple compute shaders, as to how to go about building real work applications within these restrictions.
+Stateless transforms also commit no crimes that prevent them from being used within distributed processing technologies.
+Erlang relies on these guarantees of being side-effect free to enable not just thread safe processing or interprocess safe processing, but distributed computing safe processing.
+Stateless transforms of stateful data are highly robust and deeply parallelisable.
+
+Within the processing of each element, that is for each datum operated on by the transform kernel, it is fair to use control flow.
+Almost all compilers should be able to reduce simple local value branch instructions into a platform's preferred branch-free representation, such as a CMOV, or select function for a SIMD operation.
+When considering branches inside transforms, it's best to compare to existing implementations of stream processing such as graphics card shaders or compute kernels.
+
+In predication, flow control statements are not ignored, but they are used instead as an indicator of how to merge two results.
+When the flow control is not based on a constant, a predicated if will generate code that will run both sides of the branch at the same time and discard one result based on the value of the condition.
+It manages this by selecting one of the results based on the condition.
+As mentioned before, in many CPUs there is an intrinsic for this, but all CPUs can use bit masking to effect this trick.
+
+SIMD or single-instruction-multiple-data allows the parallel processing of data when the instructions are the same.
+The data is different but local.
+When there are no conditionals, SIMD operations are simple to implement on your transforms.
+In MIMD, that is multiple instructions, multiple data, every piece of data can be operated on by a different set of instructions.
+Each piece of data can take a different path.
+This is the simplest and most error-prone to code for because it's how most parallel programming is currently done.
+We add a thread and process some more data with a separate thread of execution.
+MIMD includes multi-core general purpose CPUs.
+It often allows shared memory access and all the synchronisation issues that come with it.
+It is by far the easiest to get up and running, but it is also the most prone to the kind of rare fatal error caused by complexity of state.
+Because the order of operations become non-deterministic, the number of different possible routes taken through the code explode super-exponentially.
+
 
 \end{document}
