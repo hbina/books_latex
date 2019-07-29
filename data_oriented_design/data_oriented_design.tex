@@ -1174,4 +1174,39 @@ This object or definition agnostic approach makes refactoring and redesigning a 
 Unity's ECS provides such a solution.
 In the ECS, entities are intangible and implicit, and the components are first class citizens.
 
+\subsection{Components In The Wild}
+
+Component based approaches to development have been tried and tested.
+Many high-profile studios have used component driven entity systems to great success, and this was in part due to their developer's unspoken understanding that objects aren't a good place to store all your data and traits.
+For some, it was the opportunity to present the complexity of what makes up an entity through simpler pieces, so designers and modders would be able to reason about how their changes fit within the game framework.
+For some, it was about giving power over to performance, where components are more easily moved to a structure-of-arrays approach to processing.
+
+Gas Powered Games' Dungeon Siege Architecture is probably the earliest published document about a game company using a component based approach.
+If you get a chance, you should read the article [TODO :: LINK TO ARTICLE] to see where things really kicked off.
+The article explains that using components means the entity type doesn't need to have the ability to do anything.
+Instead, all the attributes and functionality come from the components of which the entity is made up of.
+
+The list of reasons to move to a manager driven, component based approach are numerous, and we shall attempt to cover at least a few.
+We will talk about the benefits of clear update sequences.
+We will mention how components can make it easier to debug.
+We will talk about the problem of objects applying meaning to data, causing coupling, and therefore with the dissolution of the object as the central entity, how the tyranny of the instance is mitigated.
+
+In this section, we'll show how we can take an existing class and rewrite it in a component based fashion.
+We're going to tackle a fairly typical complex object, the Player class.
+Normally these classes get messy and out of hand quite quickly.
+We're going to assume it's a Player class designed for a generic 3rd person action game, and take a typically messy class as our starting point.
+We shall use listing [TODO :: REFER TO LISTINGS SHOWING BASE OOP CLASS TO BE DISSECTED] as a reference example of one such class.
+
+[TODO :: LISTINGS OF AN OOP CLASS TO BE DISSECTED]
+
+This example class includes many of the types of things found in games, where the codebase has grown organically.
+ It's common for the Player class to have lots of helper functions to make writing game code easier.
+  Helper functions typically consider the Player as an instance in itself, from data in save through to rendering on screen.
+   It's not unusual for the Player class to touch nearly every aspect of a game, as the human player is the target of the code in the first place, the Player class is going to reference nearly everything too.
+
+AI characters will have similarly gnarly looking classes if they are generalised rather than specialised.
+ Specialising AI was more commonplace when games needed to fit in smaller machines, but now, because the Player class has to interact with many of them over the course of the game, they tend to be unified into one type just like the player, if not the same as the player, to help simplify the code that allows them to interact.
+  As of writing, the way in which AI is differentiated is mostly by data, with behaviour trees taking the main stage for driving how AI thinks about its world.
+   Behaviour trees are another concept subject to various interpretations, so some forms are data-oriented design friendly, and others are not.
+
 \end{document}
