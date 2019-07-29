@@ -999,4 +999,47 @@ The general concept of tacking on data, or patching loaded data with dynamic add
 Save games often encode the state of a dynamic world as a delta from the base state, and one of the first major uses was in fully dynamic environments, where a world is loaded, but can be destroyed or altered later.
 Some world generators took a procedural landscape and allowed their content creators to add patches of extra information, villages, forts, outposts, or even break out landscaping tools to drastically adjust the generated data.
 
+\subsection{Don't Use Enums Quite As Much}
+
+Enumerations are used to define sets of states.
+We could have had a state variable for the regenerating entity, one that had infullhealth, ishurt, isdead as its three states.
+We could have had a team index variable for the avoidance entity enumerating all the available teams.
+Instead, we used tables to provide all the information we needed, as there were only two teams.
+Any enum can be emulated with a variety of tables.
+All you need is one table per enumerable value.
+Setting the enumeration is an insert into a table or a migration from one table to another.
+
+When using tables to replace enums, some things become more difficult :
+finding out the value of an enum in an entity is difficult as it requires checking all the tables which represent that state for the entity.
+However, the main reason for getting the value is either to do an operation based on an external state or to find out if an entity is in the right state to be considered for an operation.
+This is disallowed and unnecessary for the most part, as firstly, accessing external state is not valid in a pure function, and secondly, any dependent data should already be part of the table element.
+
+If the enum is a state or type enum previously handled by a switch or virtual call, then we don't need to look up the value, instead, we change the way we think about the problem.
+The solution is to run transforms taking the content of each of the switch cases or virtual methods as the operation to apply to the appropriate table, the table corresponding to the original enumeration value.
+
+If the enum is instead used to determine whether or not an entity can be operated upon, such as for reasons of compatibility, then consider an auxiliary table to represent being in a compatible state.
+If you're thinking about the case where you have an entity as the result of a query and need to know if it is in a certain state before deciding to commit some changes, consider that the compatibility you seek could have been part of the criteria for generating the output table in the first place, or a second filtering operation could be committed to create a table in the right form.
+
+In conclusion, the reason why you would put an enum in table form, is to reduce control flow impact.
+Given this, it's when we aren't using the enumerations to control instruction flow that it's fine to leave them alone.
+Another possibility is when the value of the enum changes with great frequency, as moving objects from table to table has a cost too.
+
+Examples of enumerations that make sense are keybindings, enumerations of colours, or good names for small finite sets of values.
+Functions that return enums, such as collision responses (none, penetrating, through).
+Any kind of enumeration which is actually a lookup into data of another form is good, where the enum is being used to rationalise the access to those larger or harder to remember data tables.
+There is also a benefit to some enums in that they will help you trap unhandled cases in switches, and to some extent, they are a self-documenting feature in most languages.
+
+\subsection{Prelude To Polymorphism}
+
+If you create your classes by composition, and you allow the state to change by inserting and removing from tables, then you also allow yourself access to dynamic runtime polymorphism.
+This is a feature normally only available when dynamically responding via a switch.
+
+Polymorphism is the ability for an instance in a program to react to a common entry point in different ways due only to the nature of the instance.
+In C++, compile-time polymorphism can be implemented through templates and overloading.
+Runtime polymorphism is the ability for a class to provide a different implementation for a common base operation with the class type unknown at compile-time.
+C++ handles this through virtual tables, calling the right function at runtime based on the type hidden in the virtual table pointer at the start of the memory pointed to by the this pointer.
+Dynamic runtime polymorphism is when a class can react to a common call signature in different ways based on its type, but its type can change at runtime.
+C++ doesn't implement this explicitly, but if a class allows the use of an internal state variable or variables, it can provide differing reactions based on the state as well as the core language runtime virtual table lookup.
+Other languages which define their classes more fluidly, such as Python, allow each instance to update how it responds to messages, but most of these languages have very poor general performance as the dispatch mechanism has been built on top of dynamic lookup.
+
 \end{document}
