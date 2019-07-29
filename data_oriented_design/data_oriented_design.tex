@@ -908,5 +908,95 @@ It often allows shared memory access and all the synchronisation issues that com
 It is by far the easiest to get up and running, but it is also the most prone to the kind of rare fatal error caused by complexity of state.
 Because the order of operations become non-deterministic, the number of different possible routes taken through the code explode super-exponentially.
 
+\subsection{Don't Use Booleans}
+
+When you study compression technology, one of the most important aspects you have to understand is the difference between data and information.
+There are many ways to store information in systems, from literal strings that can be parsed to declare something exists, right down to something simple like a single bit flag to show that a thing might have an attribute.
+Examples include the text that declares the existence of a local variable in a scripting language, or the bit field containing all the different collision types a physics mesh will respond to.
+Sometimes we can store even less information than a bit by using advanced algorithms such as arithmetic encoding, or by utilising domain knowledge.
+Domain knowledge normalisation applies in most game development, but it is increasingly infrequently applied, as many developers are falling foul to overzealous application of quoting premature optimisation.
+As information is encoded in data, and the amount of information encoded can be amplified by domain knowledge, it's important that we begin to see that the advice offered by compression techniques is :
+\textbf{what we are really encoding is probabilities}.
+
+If we take an example, a game where the entities have health, regenerate after a while of not taking damage, can die, can shoot each other, then let's see what domain knowledge can do to reduce processing.
+
+We assume the following domain knowledge:
+
+\begin{itemize}
+      \item
+            If you have full health, then you don't need to regenerate.
+      \item
+            Once you have been shot, it takes some time until you begin regenerating.
+      \item
+            Once you are dead, you cannot regenerate.
+      \item
+            Once you are dead you have zero health.
+\end{itemize}
+
+[TODO :: LISTINGS]
+
+If we have a list for the entities such as in listing [TODO :: REFERENCE LISTINGS ABOVE], then we see the normal problem of data potentially causing cache line utilisation issues.
+Aside from that, we can see how you might run an update function over the list, such as in listing [TODO :: REFERENCE LISTINGS ABOVE], which will run for every entity in the game, every update.
+
+We can make this better by looking at the flow control statement.
+The function won't run if health is at max.
+It won't run if the entity is dead.
+The regenerate function only needs to run if it has been long enough since the last damage dealt.
+All these things considered, regeneration isn't the common case.
+We should try to organise the data layout for the common case.
+
+[TODO :: LISTINGS ABOUT THE NEW CODE WITH HASHES OF DAMAGED UNITS]
+
+Let's change the structures to those in listing [TODO :: REFERENCE LISTINGS ABOVE] and then we can run the update function over the health table rather than the entities.
+This means we already know, as soon as we are in this function, that the entity is not dead, and they are hurt.
+
+[TODO :: LISTINGS ABOUT THE UPDATE LOOP OVER DAMAGED UNITS ONLY]
+
+We only add a new entityhealth element when an entity takes damage.
+If an entity takes damage when it already has an entityhealth element, then it can update the health rather than create a new row, also updating the time damage was last dealt.
+If you want to find out someone's health, then you only need to look and see if they have an entityhealth row, or if they have a row in deadEntities table.
+The reason this works is, an entity has an implicit boolean hidden in the row existing in the table.
+For the entityDamages table, that implicit boolean is the isHurt variable from the first function.
+For the deadEntities table, the boolean of isDead is now implicit, and also implies a health value of 0, which can reduce processing for many other systems.
+If you don't have to load a float and check it is less than 0, then you're saving a floating point comparison or conversion to boolean.
+
+This eradication of booleans is nothing new, because every time you have a pointer to something you introduce a boolean of having a non-NULL value.
+It's the fact that we don't want to check for NULL which pushes us towards finding a different representation for the lack of existence of an object to process.
+
+Other similar cases include weapon reloading, oxygen levels when swimming, anything which has a value that runs out, has a maximum, or has a minimum.
+Even things like driving speeds of cars.
+If there are traffic, then they will spend most of their time driving at traffic speed not some speed they need to calculate.
+If you have a group of people all heading in the same direction, then someone joining the group can be intercepting until they manage to, at which point they can give up their independence, and become controlled by the group.
+There is more on this point in chapter [TODO :: REFERENCE CHAPTER ??].
+
+By moving to keeping lists of attribute state, you can introduce even more performance improvements.
+The first thing you can do for attributes that are linked to time is to put them in a sorted list, sorted by time of when they should be acted upon.
+You could put the regeneration times in a sorted list and pop entityDamage elements until you reach one that can't be moved to the active list, then run through all the active list in one go, knowing they have some damage, aren't dead, and can regen as it's been long enough.
+
+Another aspect is updating certain attributes at different time intervals.
+Animals and plants react to their environment through different mechanisms.
+There are the very fast mechanisms such as reactions to protect us from danger.
+Pulling your hand away from hot things, for example.
+There are the slower systems too, like the rationalising parts of the brain.
+Some, apparently quick enough that we think of them as real-time, are the quick thinking and acting processes we consider to be the actions taken by our brains when we don't have time to think about things in detail, such as catching a ball or balancing a bicycle.
+There is an even slower part of the brain, the part that isn't so much reading this book, but is consuming the words, and making a model of what they mean so as to digest them.
+There is also the even slower systems, the ones which react to stress, chemical levels spread through the body as hormones, or just the amount of sugar you have available, or current level of hydration.
+An AI which can think and react on multiple time-scales is more likely to waste fewer resources, but also much less likely to act oddly, or flip-flop between their decisions.
+Committing to doing an update of every system every frame could land you in an impossible situation.
+Splitting the workload into different update rates can still be regular, but offers a chance to balance the work over multiple frames.
+
+Another use is in state management.
+If an AI hears gunfire, then they can add a row to a table for when they last heard gunfire, and that can be used to determine whether they are in a heightened state of awareness.
+If an AI has been involved in a transaction with the player, it is important they remember what has happened as long as the player is likely to remember it.
+If the player has just sold an AI their +5 longsword, it's very important the shopkeeper AI still have it in stock if the player just pops out of the shop for a moment.
+Some games don't even keep inventory between transactions, and that can become a sore point if they accidentally sell something they need and then save their progress.
+
+From a gameplay point of view, these extra bits of information are all about how the world and player interact.
+In some games, you can leave your stuff lying around forever, and it will always remain just how you left it.
+It's quite a feat that all the things you have dumped in the caves of some open-world role-playing games, are still hanging around precisely where you left them hours and hours ago.
+
+The general concept of tacking on data, or patching loaded data with dynamic additional attributes, has been around for quite a while.
+Save games often encode the state of a dynamic world as a delta from the base state, and one of the first major uses was in fully dynamic environments, where a world is loaded, but can be destroyed or altered later.
+Some world generators took a procedural landscape and allowed their content creators to add patches of extra information, villages, forts, outposts, or even break out landscaping tools to drastically adjust the generated data.
 
 \end{document}
