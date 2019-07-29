@@ -1065,6 +1065,113 @@ Dynamic runtime polymorphism is when a class can react to a common call signatur
 C++ doesn't implement this explicitly, but if a class allows the use of an internal state variable or variables, it can provide differing reactions based on the state as well as the core language runtime virtual table lookup.
 Other languages which define their classes more fluidly, such as Python, allow each instance to update how it responds to messages, but most of these languages have very poor general performance as the dispatch mechanism has been built on top of dynamic lookup.
 
-[TODO :: LISTINGS REGARDING POLYMORPHISM]
+[TODO :: LISTINGS OF POLYMORPHISM USING C++ VIRTUAL TABLES]
+
+Consider the code in listing [TODO :: REFER LISTINGS ABOVE], where we expect the runtime method lookup to solve the problem of not knowing the type but wanting the size.
+Allowing the objects to change shape during their lifetime requires some compromise.
+One way is to keep a type variable inside the class such as in listing [TODO :: REFER LISTINGS BELOW], where the object acts as a container for the type variable, rather than as an instance of a specific shape.
+
+[TODO :: LISTINGS OF POLYMORPHISM IMPLEMENTED USING ENUMS]
+
+A better way is to have a conversion function to handle each case.
+In listing [TODO :: REFER LISTINGS BELOW] we see how that can be achieved.
+
+[TODO :: LISTINGS OF POLYMORPHISM USING CONVERSION]
+
+Though this works, all the pointers to the old class are now invalid.
+Using handles would mitigate these worries, but add another layer of indirection in most cases, dragging down performance even further.
+
+If you use existential processing techniques, your classes are defined by the tables they belong to.
+Then you can switch between tables at runtime.
+This allows you to change behaviour without any tricks, without the complexity of managing a union to carry all the different data around for all the states you need.
+If you compose your class from different attributes and abilities then need to change them post creation, you can.
+If you're updating tables, the fact that the pointer address of an entity has changed will mean little to you.
+It's normal for an entity to move around memory in table-based processing, so there are fewer surprises.
+Looking at it from a hardware point of view, in order to implement this form of polymorphism you need a little extra space for the reference to the entity in each of the class attributes or abilities, but you don't need a virtual table pointer to find which function to call.
+You can run through all entities of the same type increasing cache effectiveness, even though it provides a safe way to change type at runtime.
+
+Via the nature of having classes defined implicitly by the tables they belong to, there is an opportunity to register a single entity with more than one table.
+This means that not only can a class be dynamically runtime polymorphic, but it can also be multi-faceted in the sense that it can be more than one class at a time.
+A single entity might react in two different ways to the same trigger call because it might be appropriate for the current state of that class.
+
+This kind of multidimensional classing doesn't come up much in traditional gameplay code, but in rendering, there are usually a few different axes of variation such as the material, what blend mode, what kind of skinning or other vertex adjustments are going to take place on a given instance.
+Maybe we don't see this flexibility in gameplay code because it's not available through the natural tools of the language.
+It could be that we do see it, but it's what some people call entity component systems.
+
+\subsection{Event Handling}
+
+When you wanted to listen for events in a system in the old days, you'd attach yourself to an interrupt.
+Sometimes you might get to poke at code that still does this, but it's normally reserved for old or microcontroller scale hardware.
+The idea was simple, the processor wasn't really fast enough to poll all the possible sources of information and do something about the data, but it was fast enough to be told about events and process the information as and when it arrived.
+Event handling in games has often been like this, register yourself as interested in an event, then get told about it when it happens.
+The publish and subscribe model has been around for decades, but there's no standard interface built for it in some languages and too many standards in others.
+As it often requires some knowledge from the problem domain to choose the most effective implementation.
+
+Some systems want to be told about every event in the system and decide for themselves, such as Windows event handling.
+Some systems subscribe to very particular events but want to react to them as soon as they happen, such as handlers for the BIOS events like the keyboard interrupt.
+The events could be very important and dispatched directly by the action of posting the event, such as with callbacks.
+The events could be lazy, stuck in a queue somewhere waiting to be dispatched at some later point.
+The problem they are trying to solve will define the best approach.
+
+Using your existence in a table as the registration technique makes this simpler than before and lets you register and de-register with great pace.
+Subscription becomes an insert, and unsubscribing a delete.
+It's possible to have global tables for subscribing to global events.
+It would also be possible to have named tables.
+Named tables would allow a subscriber to subscribe to events before the publisher exists.
+
+When it comes to firing off events, you have a choice.
+You can choose to fire off the transform immediately, or queue up new events until the whole transform is complete, then dispatch them all in one go.
+As the model becomes simpler and more usable, the opportunity for more common use leads us to new ways of implementing code traditionally done via polling.
+
+For example :
+unless a player character is within the distance to activate a door, the event handler for the player's action button needn't be attached to anything door related.
+When the character comes within range, the character registers into the \texttt{has\_pressed\_action} event table with the \texttt{open\_door\_(X)} event result.
+This reduces the amount of time the CPU wastes figuring out what thing the player was trying to activate, and also helps provide state information such as on-screen displays saying pressing Green will Open the door.
+
+If we allow for all tables to have triggers like those found in DBMSs, then it may be possible to register interest in changes to input mappings, and react.
+Hooking into low-level tables such as an insert into a \texttt{has\_pressed\_action} table would allow user interfaces to know to change their on-screen display to show the new prompt.
+
+This coding style is somewhat reminiscent of aspect-oriented programming where it is easy to allow for cross-cutting concerns in the code.
+In aspect-oriented programming, the core code for any activities is kept clean, and any side effects or vetoes of actions are handled by other concerns hooking into the activity from outside.
+This keeps the core code clean at the expense of not knowing what is really going to be called when you write a line of code.
+How using registration tables differs is in where the reactions come from and how they are determined.
+Debugging can become significantly simpler as the barriers between cause and effect normally implicit in aspect-oriented programming are significantly diminished or removed, and the hard to adjust nature of object-oriented decision making can be softened to allow your code to become more dynamic without the normally associated cost of data-driven control flow.
+
+\section{Component Based Objects}
+
+A component-oriented design is a good start for high-level data-oriented design.
+Developing with components can put you in the right frame of mind to avoid linking together concepts needlessly.
+Objects built this way can more easily be processed by type, instead of by instance, which can lead to them being easier to profile.
+Entity systems built around them are often found in game development as a way to provide data-driven functionality packs for entities, allowing for designer control over what would normally be in the realm of a programmer.
+Not only are component based entities better for rapid design changes, but they also stymie the chances of getting bogged down into monolithic objects, as most game designers would demand more components with new features over extending the scope of existing components.
+This is because most new designs need iterating on, and extending an existing component by code to introduce design changes wouldn't allow game designers to switch back and forth trying out different things as easily.
+It's usually more flexible to add another component as an extension or as an alternative.
+
+A problem that comes up with talking about component-oriented development is how many different types of entity component systems there are.
+To help clear the ambiguity, we shall describe some different ways in which component-oriented designs work.
+
+The first kind of component-oriented approach most people use is a compound object.
+There are a few engines that use them this way, and most of them use the power of their scripting language to help them achieve a flexible, and designer friendly way to edit and create objects out of components.
+For example, Unity's GameObject is a base entity type which can include components by adding them to that particular instance's list of components.
+They are all built onto the core entity object, and they refer to each other through it.
+This approach means every entity still tends to update via iteration over root instances, not iteration over systems.
+
+Common dialogue around creating compound objects frequently refers to using components to make up an object directly by including them as members of the object.
+Though this is better than a monolithic class, it is not yet a fully component based approach.
+This technique uses components to make the object more readable, and potentially more reusable and robust to change.
+These systems are extensible enough to support large ecosystems of components shareable between projects.
+The Unity Asset Store proves the worth of components from the point of view of rapid development.
+
+When you introduce component based entities, you have an opportunity to turn the idea of how you define an object on its head.
+The normal approach to defining an object in object-oriented design is to name it, then fill out the details as and when they become necessary.
+For example, your car object is defined as a Car, if not extending Vehicle, then at least including some data about what physics and meshes are needed, with construction arguments for wheels and body shell model assets etc, possibly changing class dependent on whether it's an AI or player car.
+In component-oriented design, objects aren't so rigidly defined, and don't so much become defined after they are named, as much as a definition is selected or compiled, and then tagged with a name if necessary.
+For example, instancing a physics component with four-wheel physics, instancing a renderable for each part (wheels, shell, suspension) adding an AI or player component to control the inputs for the physics component, all adds up to something which we can tag as a Car, or leave as is and it becomes something implicit rather than explicit and immutable.
+
+A truly component based object is nothing more than the sum of its parts.
+This means the definition of a component based object is also nothing more than an inventory with some construction arguments.
+This object or definition agnostic approach makes refactoring and redesigning a much simpler exercise.
+Unity's ECS provides such a solution.
+In the ECS, entities are intangible and implicit, and the components are first class citizens.
 
 \end{document}
