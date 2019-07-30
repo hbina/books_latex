@@ -1,5 +1,5 @@
-\documentclass[a4paper,12pt]{book}
-\usepackage[a4paper, total={6in, 6in}]{geometry}
+\documentclass[a4paper,12pt]{article}
+\usepackage[a4paper, total={7in, 9in}]{geometry}
 \usepackage[utf8]{inputenc}
 \usepackage{listings}
 
@@ -510,6 +510,7 @@ We need to invent attributes as necessary using \texttt{NULL} everywhere that an
 We convert the calls to \texttt{CreateRoom}, \texttt{AddDoor}, \texttt{SetRoomAsSpecial}, and \texttt{AddPickup}, to columns in the Rooms table.
 See table (TODO :: TABLE) for one way to build up a table that represents all those setup function calls.
 
+\newpage
 \section{Normalisation}
 
 Back when SQL was first created there were only three well-defined stages of data normalisation.
@@ -701,6 +702,7 @@ After the emergence of NoSQL solutions for handling even larger workloads, and v
 
 What's become clear over the last decade is that most of the high-level data processing techniques which are proving to be useful are a combination of hardware-aware data manipulation layers being used by functional programming style high-level algorithms. As the hardware in your PC becomes more and more like the internet itself, these techniques will begin to dominate on personal hardware, whether it be personal computers, phones, or whatever the next generation brings. Data-oriented design was inspired by a realisation that the hardware had moved on to the point where the techniques we used to use to defend against latency from CPU to hard drive, now apply to memory. In the future, if we raise processing power by the utilisation of hoards of isolated unreliable computation units, then the techniques for distributing computing across servers that we're developing in this era, will apply to the desktops of the next.
 
+\newpage
 \section{Existential Processing}
 
 If you saw there weren't any apples in stock, would you still haggle over their price?
@@ -1137,6 +1139,7 @@ This keeps the core code clean at the expense of not knowing what is really goin
 How using registration tables differs is in where the reactions come from and how they are determined.
 Debugging can become significantly simpler as the barriers between cause and effect normally implicit in aspect-oriented programming are significantly diminished or removed, and the hard to adjust nature of object-oriented decision making can be softened to allow your code to become more dynamic without the normally associated cost of data-driven control flow.
 
+\newpage
 \section{Component Based Objects}
 
 A component-oriented design is a good start for high-level data-oriented design.
@@ -1300,19 +1303,20 @@ Moving away from compile-time defined classes means many other classes can be in
 Allowing scripts to generate new classes of entity by composition or prototyping increases their power dramatically, and cleanly increase the apparent complexity of the game without adding more actual complexity.
 Finally, all the different entities in the game will now run the same code at the same time, which simplifies and centralises your processing code, leading to more opportunity to share optimisations, and fewer places for bugs to hide
 
+\newpage
 \section{Hierarchical Level of Detail and Implicit-State}
 
 Consoles and graphics cards are not generally bottlenecked at the polygon rendering stage in the pipeline.
 Usually, they are bandwidth bound.
- If there is a lot of alpha blending, it's often fill-rate issues.
-  For the most part, graphics chips spend a lot of their time reading textures, and texture bandwidth often becomes the bottleneck.
-   Because of this, the old way of doing level of detail with multiple meshes with decreasing numbers of polygons is never going to be as good as a technique which takes into account the actual data required of the level of detail used in each renderable.
-    The vast majority of stalls when rendering come from driver side processing, or from processing too much for what you want to actually render.
-     Hierarchical level of detail can fix the problem of high primitive count which causes more driver calls than necessary.
+If there is a lot of alpha blending, it's often fill-rate issues.
+For the most part, graphics chips spend a lot of their time reading textures, and texture bandwidth often becomes the bottleneck.
+Because of this, the old way of doing level of detail with multiple meshes with decreasing numbers of polygons is never going to be as good as a technique which takes into account the actual data required of the level of detail used in each renderable.
+The vast majority of stalls when rendering come from driver side processing, or from processing too much for what you want to actually render.
+Hierarchical level of detail can fix the problem of high primitive count which causes more driver calls than necessary.
 
 The basic approach for art is to make optimisations by grouping and merging many low level of detail meshes into one single low level of detail mesh.
- This reduces the time spent in the setup of render calls which is beneficial in situations where driver calls are costly.
-  In a typical very large scale environment, a hierarchical level of detail approach to game content can reduce the workload on a game engine by an order of magnitude as the number of entities in the scene considered for processing and rendering drops significantly.
+This reduces the time spent in the setup of render calls which is beneficial in situations where driver calls are costly.
+In a typical very large scale environment, a hierarchical level of detail approach to game content can reduce the workload on a game engine by an order of magnitude as the number of entities in the scene considered for processing and rendering drops significantly.
 
 Even though the number of polygons rendered may be exactly the same, or maybe even higher, the fact that the engine usually is only handling roughly the same number of entities at once on average increases stability and allows for more accurately targeted optimisations of both art and code.
 
