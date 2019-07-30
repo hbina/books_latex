@@ -1320,4 +1320,64 @@ In a typical very large scale environment, a hierarchical level of detail approa
 
 Even though the number of polygons rendered may be exactly the same, or maybe even higher, the fact that the engine usually is only handling roughly the same number of entities at once on average increases stability and allows for more accurately targeted optimisations of both art and code.
 
+\subsection{Existence From Null to Infinity}
+
+If we consider that entities can be implicit based on their attributes, we can utilise the technique of hierarchical level of detail to offer up some optimisations for our code.
+In traditional level of detail techniques, as we move further away from the object or entity of interest, we lose details and fidelity.
+We might reduce polygon count, or texture sizes, or even the number of bones in a skeleton that drives the skinned mesh.
+Game logic can also degrade.
+Moving away from an entity, it might switch to a much coarser grain time step.
+It's not unheard of for behaviours of AI to migrate from a 50hz update to a 1hz update.
+In a hierarchical level of detail implementation, as the entity becomes closer, or more apparent to the player, it might be that only at that point does it even begin to exist.
+
+Consider a shooter game where you are defending a base from incoming attacks.
+You are manning an anti-air turret, and the attackers come in squadrons of aircraft, you can see them all coming at once, over ten thousand aircraft in all, and up to a hundred at once in each squadron.
+You have to shoot them down or be inundated with gunfire and bombs, taking out both you and the base you are defending.
+
+Running full AI, with swarming for motion and avoidance for your slower moving ordnance might be too much if it was run on all ten thousand ships every tick, but you don't need to.
+The basic assumption made by most AI programmers is that unless they are within attacking range, then they don't need to be running AI.
+This is true and offers an immediate speedup compared to the naïve approach.
+Hierarchical LOD provides another way to think about this, by changing the number of entities based on how they are perceived by the player.
+For want of a better term, collective lodding is a name that describes what is happening behind the scenes a little better.
+Sometimes there is no hierarchy, and yet, there can still be a change in the manner in which the elements are referenced between the levels of detail.
+The term collective lodding is inspired by the concept of a collective term.
+A murder of crows is a computational element, but each crow is a lower level of detail sub-element of the collective.
+
+[TODO :: PICTURE OF COLLECTIVE LODDING OF CROWS]
+
+In the collective lodding version of the base defender game, there are a few wave entities which project squadron blips on the radar.
+The squadrons don't exist as their own entities until they get close enough.
+Once a wave's squadron is within range, the wave will decrease its squadron count and pop out a new squadron entity.
+The newly created squadron entity shows blips on the radar for each of its component aircraft.
+The aircraft don't exist yet, but they are implicit in the squadron in the same way the squadron was implicit in the wave.
+The wave continues to pop Squadrons as they come into range, and once its internal count has dropped to zero, it can delete itself as it now represents no entities.
+As a squadron comes into even closer range, it pops out its aircraft into their own entities and eventually deletes itself.
+As the aircraft get closer, traditional level of detail techniques kick in and their renderables are allowed to switch to higher resolution and their AI is allowed to run at a higher intelligence setting.
+
+[TODO :: PICTURE OF WAVES -> SQUADRONS -> UNITS]
+
+When the aircraft are shot at, they switch to a taken damage type.
+They are full health enemy aircraft unless they take damage.
+If an AI reacts to damage with fear, they may eject, adding another entity to the world.
+If the wing of the plane is shot off, then that also becomes a new entity in the world.
+Once a plane has crashed, it can delete its entity and replace it with a smoking wreck entity that will be much simpler to process than an aerodynamic simulation, faked or not.
+
+If things get out of hand and the player can't keep the aircraft at bay and their numbers increase in size so much that any normal level of detail system can't kick in to mitigate it, collective lodding can still help by returning aircraft to squadrons and flying them around the base attacking as a group, rather than as individual aircraft.
+In the board game Warhammer Fantasy Battle, there were often so many troops firing arrows at each other, that players would often think of attacks by squads as being collections of attacks, and not actually roll for each individual soldier, rat, orc or whatever it was, but instead counted up how many troops they had, and rolled that many dice to see how many attacks got through.
+This is what is meant by attacking as a squadron.
+The aircraft no longer attack, instead, the likelihood an attack will succeed is calculated, dice are rolled, and that many attacks get through.
+The level of detail heuristic can be tuned so the nearest and front-most squadron are always the highest level of detail, effectively making them roll individually, and the ones behind the player maintain a very simplistic representation.
+
+This is game development smoke and mirrors as a basic game engine element.
+In the past we have reduced the number of concurrent attacking AI, reduced the number of cars on screen by staggering the lineup over the whole race track, and we've literally combined people together into one person instead of having loads of people on screen at once.
+This kind of reduction of processing is commonplace.
+Now consider using it everywhere appropriate, not just when a player is not looking.
+
+\subsection{Mementos}
+
+Reducing detail introduces an old problem, though.
+Changing level of detail in game logic systems, AI and such, brings with it the loss of high detail history. In this case, we need a way to store what is needed to maintain a highly cohesive player experience. If a high detail squadron in front of the player goes out of sight and another squadron takes their place, we still want any damage done to the first group to reappear when they come into sight again. Imagine if you had shot out the glass on all the aircraft and when they came round again, it was all back the way it was when they first arrived. A cosmetic effect, but one that is jarring and makes it harder to suspend disbelief.
+
+When a high detail entity drops to a lower level of detail, it should store a memento, a small, well-compressed nugget of data that contains all the necessary information in order to rebuild the higher detail entity from the lower detail one. When the squadron drops out of sight, it stores a memento containing compressed information about the amount of damage, where it was damaged, and rough positions of all the aircraft in the squadron. When the squadron comes into view once more, it can read this data and generate the high detail entities back in the state they were before. Lossy compression is fine for most things, it doesn't matter precisely which windows, or how they were cracked, maybe just that about $ 2/3$ of the windows were broken.
+
 \end{document}
