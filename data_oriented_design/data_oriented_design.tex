@@ -11,6 +11,7 @@
 \maketitle
 \tableofcontents
 
+TODO :: Add summaries for each subchapters\dots
 \newpage
 \section{Data-Oriented Design}
 
@@ -1376,8 +1377,15 @@ Now consider using it everywhere appropriate, not just when a player is not look
 \subsection{Mementos}
 
 Reducing detail introduces an old problem, though.
-Changing level of detail in game logic systems, AI and such, brings with it the loss of high detail history. In this case, we need a way to store what is needed to maintain a highly cohesive player experience. If a high detail squadron in front of the player goes out of sight and another squadron takes their place, we still want any damage done to the first group to reappear when they come into sight again. Imagine if you had shot out the glass on all the aircraft and when they came round again, it was all back the way it was when they first arrived. A cosmetic effect, but one that is jarring and makes it harder to suspend disbelief.
+Changing level of detail in game logic systems, AI and such, brings with it the loss of high detail history.
+In this case, we need a way to store what is needed to maintain a highly cohesive player experience.
+If a high detail squadron in front of the player goes out of sight and another squadron takes their place, we still want any damage done to the first group to reappear when they come into sight again.
+Imagine if you had shot out the glass on all the aircraft and when they came round again, it was all back the way it was when they first arrived.
+A cosmetic effect, but one that is jarring and makes it harder to suspend disbelief.
 
-When a high detail entity drops to a lower level of detail, it should store a memento, a small, well-compressed nugget of data that contains all the necessary information in order to rebuild the higher detail entity from the lower detail one. When the squadron drops out of sight, it stores a memento containing compressed information about the amount of damage, where it was damaged, and rough positions of all the aircraft in the squadron. When the squadron comes into view once more, it can read this data and generate the high detail entities back in the state they were before. Lossy compression is fine for most things, it doesn't matter precisely which windows, or how they were cracked, maybe just that about $ 2/3$ of the windows were broken.
+When a high detail entity drops to a lower level of detail, it should store a memento, a small, well-compressed nugget of data that contains all the necessary information in order to rebuild the higher detail entity from the lower detail one.
+When the squadron drops out of sight, it stores a memento containing compressed information about the amount of damage, where it was damaged, and rough positions of all the aircraft in the squadron.
+When the squadron comes into view once more, it can read this data and generate the high detail entities back in the state they were before.
+Lossy compression is fine for most things, it doesn't matter precisely which windows, or how they were cracked, maybe just that about $2/3$ of the windows were broken.
 
 \end{document}
