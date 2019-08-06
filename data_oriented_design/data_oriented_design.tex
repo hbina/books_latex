@@ -1388,4 +1388,53 @@ When the squadron drops out of sight, it stores a memento containing compressed 
 When the squadron comes into view once more, it can read this data and generate the high detail entities back in the state they were before.
 Lossy compression is fine for most things, it doesn't matter precisely which windows, or how they were cracked, maybe just that about $2/3$ of the windows were broken.
 
+\subsection{JIT Mementos}
+
+If a vehicle that has been created as part of the ambient population is suddenly required to take on a more important role, such as the car being involved in a firefight, it needs to gain detail.
+This detail must come from somewhere and must be convincing.
+It is important to generate new entities which don't seem overly generic or unlikely, given what the player knows about the game so far.
+Generating that data can be thought of as providing a memento to read from just in time.
+Just in time mementos, or JIT mementos, offers a way to create fake mementos that can provide continuity by utilising pseudo-random generators or hash functions to create suitable information on demand without relying on storing data anywhere.
+Instead, they rely only on information provided implicitly by the entity in need of it.
+
+Instead of generating new characters from a global random number generator, it is possible to seed the generator with details about the thing that needs generation.
+For example, you want to generate a driver and some passengers, as you're about to get close enough to a car to need to render the people inside it.
+Just creating random characters from a set of lookup tables is good, but if you drive past them far enough for them to get out of rendering range, and then return, the people in the car might not look the same anymore as they had to be regenerated.
+Instead, generate the driver and passengers using some other unique attribute, such as the license plate, as a seed. 
+This way, while you have not affected the result of generating the memento, you have no memory overhead to store it, and no object lifetime to worry about either, as it can always be reproduced from nothing again.
+
+This technique is used all the time in landscape generators, where the landscape is seeded from the x,y location in the map, so why not use it when generating the weather for day 107 of the game?
+When generating Perlin noise, many algorithms call upon a noise function, but to have a reproducible landscape, the noise function must be a repeatable function, so it can create the same results over and over again.
+If you're generating a landscape, it's preferred for the noise function to be coherent, that is, for small variances in the input function, only small changes should be observed in the output.
+We don't need such qualities when generating JIT mementos, and a hash function which varies wildly with even the smallest change in the input will suffice.
+
+An example of using this to create a JIT memento might be to generate a house for a given landscape.
+First, take any normal random number generator and seed it with the location of the building.
+Given the landscape the house is on, select from a building template and start generating random numbers to answer questions about the house the same way loading a file off disk answers questions about the object.
+How large is the house?
+Is it small, medium, large?
+Generate a random number and select one answer.
+How many rooms does it have based on the size?
+2 or 3 for small, or $(int)(7 + rand * 10)$ for large.
+The point is, once you have seeded the random number generator, you're going to get the same results back every time you run through the same process.
+Every time you visit the house at ${223.17,-100.5}$, you're going to see the same 4 (or more) walls, and it will have the same paint job, broken windows, or perfect idyllic little frog pond in the back garden.
+
+JIT mementos can be the basis of a highly textured environment with memento style sheets or style guides which can direct a feel bias for any mementos generated in those virtual spaces.
+Imagine a city style guide that specifies rules for occupants of cars.
+The style guide might claim that businessmen might share, but are much less likely to, that families have children in the back seats with an older adult driving.
+It might declare that young adults tend to drive around in pairs.
+Style guides help add believability to any generated data.
+Add in local changes such as having types of car linked to types of drivers.
+Have convertibles driven by well-dressed types or kids, low riders driven almost exclusively by their stereotypical owner, and imports and modded cars driven by young adults.
+In a space game, dirty hairy pilots of cargo ships, well turned out officers commanding yachts, rough and ready mercenaries in everything from a single seater to a dreadnought. Then, once you have the flavour in place, allow for a little surprise to bring it to life fully.
+
+JIT mementos are a good way to keep the variety up, and style guides bias that so it comes without the impression that everyone is different so everyone is the same.
+When these biases are played out without being strictly adhered to, you can build a more textured environment.
+If your environment is heavily populated with completely different people all the time, there is nothing to hold onto, no patterns to recognise.
+When there are no patterns, the mind tends to see noise or consider it to be a samey soup.
+Even the most varied virtual worlds look bland when there is too much content all in the same place.
+Walk along the street and see if you can spot any identical paving slabs.
+You probably can, but also see the little bits of damage, decay, dirt, mistakes, and blemishes.
+To make an environment believable, you have to make it look like someone took a lot of effort trying to make it all conform. 
+
 \end{document}
