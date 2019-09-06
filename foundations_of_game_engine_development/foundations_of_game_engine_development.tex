@@ -19,9 +19,56 @@
 \tableofcontents
 
 \section{Preface}
+
+This book provides a detailed introduction to the mathematics used by modern game engine programmers.
+The first three chapters cover the topics of linear algebera (vector and matrices), transforms, and geometry in a conventional manner common to many other textbooks on the subject.
+This is done to provide a familiarity with the usual approach so that it's easy to make connections to similar expositions of the same topics elsewhere in the literature.
+Along the way, we will make several attempts to foreshadow the discussion of a manifestly more elegant and more correct mathematical model that appears in the fourth cahpter.
+The last quarter of the book endeavors to provide a deeper understanding of many of the concepts discussed eaerlir by introducing Grasmann algebra and geometric algebra.
+Knowledge of these branches of mathematics also allows us to convey intuition and provide details in the first three chapters that are difficult to find elsewhere.
+
+One of the goals in this book is to give practical engineering advice.
+This is accomplished through many short code listings appearing throughout the book, showing how the mathematics we've discussed is implemented inside real-world game engines.
+To avoid filling pages with code listings that are illustratively redundant, some data structures or functions referenced in various places have intentionally been left out.
+This happens only when the form and behavior of the missing code is obvious.
+For example, Chapter 1 includes code listings that define a data structure and operations corresponding to a three-dimensional vector, but it doesn't show similar code for a four dimensional vector, even though its used by other code listings later in the book, because it would be largely identical.
+The complete library of code is available on the website cited below.
+
+The book assume knowledge of C++, trigonometry and standard floating-point operations.
+In Chapter 3, there will be a bit of calculus involved.
+If you are already familiar with linear algebra, you could skip the first two chapters.
+It is not adviseable to skip Chapter 3 as Chapter 4 requires familiarity with the former.
+
+The source code for the listings provided in the book is available at : [TODO :: LINK]
+
+Have fun and good luck.
+
 \section{Vectors and Matrices}
+
+Vector and matrices is one of the most fundamental building block in game engine development.
+It is used practically everywhere.
+Thus a strong grasp on this subject is required before going further.
+With that in mind, this book will go through all the contents assuming only an existing proficiency in trigonometry on the part of the reader.
+
 \subsection{Vector Fundamentals}
-\subsection{Basic Vector Operations}
+
+There are 2 ways to represent numerical quantities in geometry, physics and many other fields applied to virtual simulations.
+One is a \textit{scalar} and a \textit{vector}.
+
+A \textit{scalar} is a quantity such as distance, mass, or time that can be fully described by a single numerical value.
+For instance, the number of apples is $X$, or the amount of health left is $Y$.
+
+A \textit{vector} is a quantity that carries enough information to represent a direction in space in addition to a magnitude.
+For example :
+
+\begin{enumerate}
+    \item
+          A position in 3D space requires 3 numerical values.
+    \item
+          A projectile have both the direction (X,Y,Z) and a magnitude.
+\end{enumerate}
+
+66c\subsection{Basic Vector Operations}
 \subsubsection{Magnitude and Scalar Operations}
 \subsubsection{Addition and Subtraction}
 \subsection{Matrix Fundamentals}
