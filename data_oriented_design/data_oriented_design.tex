@@ -1400,7 +1400,7 @@ Instead, they rely only on information provided implicitly by the entity in need
 Instead of generating new characters from a global random number generator, it is possible to seed the generator with details about the thing that needs generation.
 For example, you want to generate a driver and some passengers, as you're about to get close enough to a car to need to render the people inside it.
 Just creating random characters from a set of lookup tables is good, but if you drive past them far enough for them to get out of rendering range, and then return, the people in the car might not look the same anymore as they had to be regenerated.
-Instead, generate the driver and passengers using some other unique attribute, such as the license plate, as a seed. 
+Instead, generate the driver and passengers using some other unique attribute, such as the license plate, as a seed.
 This way, while you have not affected the result of generating the memento, you have no memory overhead to store it, and no object lifetime to worry about either, as it can always be reproduced from nothing again.
 
 This technique is used all the time in landscape generators, where the landscape is seeded from the x,y location in the map, so why not use it when generating the weather for day 107 of the game?
@@ -1435,7 +1435,7 @@ When there are no patterns, the mind tends to see noise or consider it to be a s
 Even the most varied virtual worlds look bland when there is too much content all in the same place.
 Walk along the street and see if you can spot any identical paving slabs.
 You probably can, but also see the little bits of damage, decay, dirt, mistakes, and blemishes.
-To make an environment believable, you have to make it look like someone took a lot of effort trying to make it all conform. 
+To make an environment believable, you have to make it look like someone took a lot of effort trying to make it all conform.
 
 \subsection{Alternate Axes}
 
@@ -1448,7 +1448,7 @@ This value normally comes from a function which takes the camera position and fi
 What we may also realise when discarding the distance assumption is a more fundamental understanding of what we are trying to do.
 We are using a single runtime variable to control the presentation state of the entities of our game.
 We use runtime variables to control the state of many parts of our game already, but in this case, there is a passive presentation response to the variable, or axis being monitored.
-The presentation is usually some graphical, or logical level of detail, but it could be something as important to the entity as its own existence. 
+The presentation is usually some graphical, or logical level of detail, but it could be something as important to the entity as its own existence.
 
 \subsubsection{The True Measure}
 
@@ -1462,7 +1462,7 @@ They took up as much perception attention as a single squadron, and a single squ
 
 Understand this concept :
 level of detail should be defined by how the player perceives a thing, at the range it is at.
-If you internalise this, you will be on your way to making good decisions about where the boundaries are between your levels of detail. 
+If you internalise this, you will be on your way to making good decisions about where the boundaries are between your levels of detail.
 
 \subsection{Beyond Space}
 
@@ -1513,6 +1513,6 @@ Another might manage to accept the forward event, only to have the next menu acc
 Sometimes the menu may transition due to external forces, and if there is player input captured in a different thread of execution, the game state can become disjoint and unresponsive.
 Consider a network game's lobby, where if everyone is ready to play, but the host of the game disconnects while you are entering into the options screen prior to game launch, in a traditional state-machine like approach to menus, where should the player return to once they exit the options screen?
 The lobby would normally have dropped you back to a server search screen, but in this case, the lobby has gone away to be replaced with nothing.
-This is where having simple axes instead of state machines can prove to be simpler to the point of being less buggy and more responsive. 
+This is where having simple axes instead of state machines can prove to be simpler to the point of being less buggy and more responsive.
 
 \end{document}

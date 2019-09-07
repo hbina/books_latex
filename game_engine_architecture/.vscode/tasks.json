@@ -1,0 +1,29 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "tectonic build",
+            "type": "shell",
+            "command": "tectonic",
+            "args": [
+                "notes_on_game_engine_architecture.tex",
+                "--keep-intermediates",
+                "--print",
+                "--keep-logs"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "promptOnClose": true,
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            }
+        }
+    ]
+}
