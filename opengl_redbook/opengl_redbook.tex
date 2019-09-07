@@ -55,7 +55,7 @@
 \subsection{What Is OpenGL}
 
 This chapter describes the purpose of OpenGL, what it can and cannot do in creating computer-generated graphics.
-In particular, OpenGL's purpose is very specific in that it does not provide any APIs for creating windows, what type of representation you have to use for models and many other functions one might associate with making a program.
+OpenGL's purpose is very specific in that it does not provide any APIs for creating windows, what type of representation you have to use for models and many other functions one might associate with making a program.
 
 The major operations that an OpenGL application would perform is the following:
 
@@ -157,13 +157,13 @@ GLSL is extremely similar to C with a little bit of C++.
 \subsubsubsection{The Starting Point}
 
 Just like any C/C++ programs, a shader program begins its execution in the function \verb|void main()|.
-The difference here is that C's \verb|main()| does not accept any arguments nor does it return any value.
+Unlike C, GLSL's \verb|main()| does not accept any arguments nor does it return any value.
 
 \subsubsubsection{Declaring Variables}
 
 GLSL provides several basic data types that can be used to define a variable's type.
-The rules of allowed variable names are similar to C except that variable names cannot contain consecutive underscores (\verb|_|).
-Consecutive underscores are reserved in GLSL.
+The rules of allowed variable names are similar to C/C++ with the additional rule that variable names cannot contain consecutive underscores (\verb|_|).
+Names with consecutive underscores are reserved in GLSL.
 
 \begin{minipage}{\textwidth}
 \centering
