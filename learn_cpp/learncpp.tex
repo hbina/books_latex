@@ -1,0 +1,71 @@
+\documentclass[a4paper, 12pt]{extbook}
+\usepackage[utf8]{inputenc}
+\usepackage[a4paper, total={7in, 10in}]{geometry}
+\usepackage{listings}
+\usepackage{hyperref}
+% Table stuff
+\usepackage{tabularx,ragged2e,booktabs,caption}
+\newcolumntype{C}[1]{>{\Centering}m{#1}}
+\renewcommand\tabularxcolumn[1]{C{#1}}
+% Extension for subsubsub...section of depth>3
+\usepackage{titlesec}
+
+\titleclass{\subsubsubsection}{straight}[\subsection]
+
+\newcounter{subsubsubsection}[subsubsection]
+\renewcommand\thesubsubsubsection{\thesubsubsection.\arabic{subsubsubsection}}
+\renewcommand\theparagraph{\thesubsubsubsection.\arabic{paragraph}} % optional; useful if paragraphs are to be numbered
+
+\titleformat{\subsubsubsection}
+  {\normalfont\normalsize\bfseries}{\thesubsubsubsection}{1em}{}
+\titlespacing*{\subsubsubsection}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+\makeatletter
+\renewcommand\paragraph{\@startsection{paragraph}{5}{\z@}%
+  {3.25ex \@plus1ex \@minus.2ex}%
+  {-1em}%
+  {\normalfont\normalsize\bfseries}}
+\renewcommand\subparagraph{\@startsection{subparagraph}{6}{\parindent}%
+  {3.25ex \@plus1ex \@minus .2ex}%
+  {-1em}%
+  {\normalfont\normalsize\bfseries}}
+\def\toclevel@subsubsubsection{4}
+\def\toclevel@paragraph{5}
+\def\toclevel@paragraph{6}
+\def\l@subsubsubsection{\@dottedtocline{4}{7em}{4em}}
+\def\l@paragraph{\@dottedtocline{5}{10em}{5em}}
+\def\l@subparagraph{\@dottedtocline{6}{14em}{6em}}
+\makeatother
+
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{4}
+
+\begin{document}
+
+\section{Introduction}
+
+C++ is an extremely powerful language that allows you to write efficient program without having to get dirty with low level construct.
+This is possible because C++ design puts a lot of emphasis on having zero-cost abstractions.
+
+\section{C++ Basics}
+
+We will now go through the basics of C++ that you will commonly encounter.
+
+\subsection{Variable Assignment and Initialization}
+
+\subsubsection{Variable Assignment}
+
+After a variable has been defined, you can give it values using the \verb|=|.
+This is called a \verb|copy assignemnt|.
+
+\begin{lstlisting}[language=c++]
+// defining a variable
+int width;
+// assigning it with a value of 10
+width = 10;
+// you can immediately assign it values, of course!
+int height = 100;
+\end{lstlisting}
+
+\end{document}
