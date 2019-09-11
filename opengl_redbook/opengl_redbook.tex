@@ -120,6 +120,7 @@ In a way, it is very similar to C.
 As of version 4.3, OpenGL provides 4 processing stagesm plus an unrelated compute stage:
 
 \begin{itemize}
+      
       \item
             The \textbf{vertex shading stage} receives the vertex data that you specified in your vertex-buffer objects, processing each vertex separately.
             This stage is mandatory for all OpenGL programs and must have a shader bound to it.
@@ -234,7 +235,7 @@ This is quite important if you want to do compute shader.
       \item
             The \verb|precise| Qualifier
 
-      \end{itemize}
+\end{itemize}
 
 \subsubsection{Shader Preprocessor}
 
@@ -285,8 +286,9 @@ This is very similar to uniform blocks.
 There are 2 differences however:
 
 \begin{enumerate}
+
       \item
-            Shader can write to them.
+            Shaders can write to them.
             Thus, any other shader invocations or the application will see the change.
       \item
             Their size can be established just before rendering, rather than at compile time or link time.
@@ -303,6 +305,44 @@ There are 2 differences however:
             Don't fret!
             We can obtain its size using \verb|length()| function.
 
+            This is especially useful in compute shaders.
+
 \end{enumerate}
+
+\subsubsection{In/Out Blocks}
+
+Shader variables can move between stages.
+These can be organized into interface blocks.
+These local groupings makes it easier to visuall verify that the interfaces matches between stages.
+
+For instance, for lighting purposes we could have our vertex shader output the following block:
+
+\begin{lstlisting}
+      out Lighting {
+            vec3 normal;
+            vec2 bumpCoord;
+      }
+\end{lstlisting}
+
+Then the other stage receiving this output must have the matching:
+
+\begin{lstlisting}
+      in Lighting {
+            vec3 normal;
+            vec2 bumpCoord;
+      }
+\end{lstlisting}
+
+GLSL's defined in/out variables are also organized into blocks.
+For example, \verb|gl_perVertex| contains the built-in variable \verb|gl_Position| among others.
+
+\subsubsection{Compiling Shaders}
+
+This step of the process is similar to compiler-based languages like C.
+We have a code, we let a compiler analyze, and if there are no errors, generate an object file for us.
+Next, you link multiple object files to generate an executable.
+
+I suppose the difference here is that everything is opaque.
+One only receives the handle for the object files and the executable.
 
 \end{document}

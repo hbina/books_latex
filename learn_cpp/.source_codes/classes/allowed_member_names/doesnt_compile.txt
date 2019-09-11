@@ -1,0 +1,6 @@
+struct A
+{
+    int A;
+    // name conflict
+    A() = default;
+};

@@ -41,31 +41,275 @@
 \setcounter{secnumdepth}{4}
 \setcounter{tocdepth}{4}
 
+\title{Notes on C++}
+\author{Hanif Bin Ariffin}
+
 \begin{document}
 
+\maketitle
+\tableofcontents
+
+\newpage
 \section{Introduction}
 
 C++ is an extremely powerful language that allows you to write efficient program without having to get dirty with low level construct.
 This is possible because C++ design puts a lot of emphasis on having zero-cost abstractions.
 
-\section{C++ Basics}
+\section{Declarations}
 
-We will now go through the basics of C++ that you will commonly encounter.
+\subsection{Initialization}
 
-\subsection{Variable Assignment and Initialization}
+References : \href{https://en.cppreference.com/w/cpp/language/initialization}{1}
 
-\subsubsection{Variable Assignment}
+Initialization of a variable provides its initial value at the time of construction.
+The initial value may be provided in the initializer section of a declarator or a new expression.
+It also takes place during function calls: function parameters and the function return values are also initialized.
 
-After a variable has been defined, you can give it values using the \verb|=|.
-This is called a \verb|copy assignemnt|.
+There are currently 6 kinds of initializer:
 
-\begin{lstlisting}[language=c++]
-// defining a variable
-int width;
-// assigning it with a value of 10
-width = 10;
-// you can immediately assign it values, of course!
-int height = 100;
-\end{lstlisting}
+\begin{itemize}
+  \item Value initialization
+  \item Direct initialization
+  \item Copy initialization
+  \item List initialization
+  \item Aggregate initialization
+  \item Reference initialization
+\end{itemize}
 
+Before that, lets talk about non-local variables.
+
+\subsubsection{Non-Local Variables}
+
+All non-local variables with static storage duration are initialized as part of program startup.
+This must happen before the call to the main function is made, unless it is deferred.
+The later case will be discussed later.
+
+All variables with thread-local storage are initialized as part of the thread launch.
+It will be initialized before the thread function begins.
+
+\paragraph{Static Initialization}
+
+\begin{itemize}
+  \item
+        If permitted, constant initialization will take place first.
+        In practice, these variables are initialized during compile time.
+        Especially if they are const, then we can be sure that all the information we need to know about that variable's usages is known at compile time.
+        As such, they might be inlined entirely so cache locality can be improved.
+  \item
+        For all other non-local static and thread-local variables, zero initialization will take place.
+        This is a bit different than constant initialization in that we know what values \textit{all} of these variables will take....a bunch of \verb|0|s.
+        Therefore, instead of storing a bunch of zeros in the .bss segment of the program's image, the compiler might instead store this information in a different way.
+        Thus, the size of the image can be a lot smaller.
+
+        During runtime, the execution of the program will then allocate all the memories required by all those zero'ed variables.
+\end{itemize}
+
+\paragraph{Dynamic Initialization}
+
+% TODO :: Properly study these stuffs.
+% Frankly I just don't understand what this is all about.
+
+After all of the dynamic initialization is completed, initialization of non-local variables occurs in the following situations.
+
+\begin{itemize}
+  \item Unordered dynamic initialization
+
+        Applies only to static or thread-local class template static data member and \hyperref[appendix:templates:variable_template]{variable templates} that aren't explicitly specialized.
+        Initialization of such variables is indeterminately sequenced with respect to all other dynamic initialization.
+        % TODO :: Special case with threads.
+
+  \item Partially-ordered dynamic initialization
+
+        Applies to all inline variables that are not an implicitly or explicitly instantiated specialization.
+        If a partially-ordered V is defined before oredered or partially-ordered W in every translation unit, the initialization of V is sequenced before the initialization of W.
+        % TODO :: Special case with threads.
+
+  \item Ordered dynamic initialization
+
+        Applies to all other non-local variables:
+        within a single translation unit, initialization of these varialbes is always sequenced in exact order their definitions appear.
+        Initialization of static varialbes in different translation units is indeterminately sequenced.
+        Thread-local variables in different translation units is unsequenced.
+
+        % TODO :: QUESTION :: Regarding the last point about thread-local variables,
+        % is it because every instance will have difference sequence for each translation units?
+\end{itemize}
+
+\paragraph{Early Dynamic Initialization}
+
+The compilers are allowed to initialize dynamically-initialized variables as part of static initialization.
+Essentially, if its possible to determine the values of some variables during compile time.
+
+If the following conditions are true, then its possible:
+
+\begin{itemize}
+  \item The dynamic version of the initialization does not change the value of any other object of namespace scope initialization prior to its initialization.
+  \item The static version of the initialization produces the same value in the initialized variable as would be produced by the dynamic initialization if all variables not required to be initialized statically were initialized dynamically.
+        % Essentially, if its possible to determine their values at compile time, then its allowed to statically initialize them.
+\end{itemize}
+
+\lstinputlisting[language=c++]{./.source_codes/cpp_basic_dynamic_initialization.txt}
+
+Note that \verb|double d2 = d1;| is unspecified.
+It is dynamically initialized to 0.0 if d1 is dynamically initialized.
+Or dynamically initialized to 1.0 if d1 is statically initialized.
+Or statically initialized to 0.0 (because that would be its value.
+If both variables were dynamically initialized) may be initialized statically or dynamically to 1.0
+
+\paragraph{Deferred Dyamic Initialization}
+
+% TODO :: Fill up this page.
+% This is mostly referred to uninitialized variables that used at some point at runtime.
+% Depending on the control flow, their initialization is undetermined.
+
+\newpage
+\section{Classes}
+
+Reference : \href{https://en.cppreference.com/w/cpp/language/classes}{1}
+
+A class is a user-defined type.
+We will skip the syntax description and go straight to the details.
+
+\paragraph{Difference Between Structs and Classes}
+
+The are the same except for 2 differences:
+
+\begin{itemize}
+  \item
+        The former have default public access mode while the latter have private default access mode.
+  \item
+        The former have default public inheritance mode while the latter have private inheritance mode.
+        % TODO :: Link to inheritance mode.
+\end{itemize}
+
+A class can have the following kinds of members:
+
+\begin{itemize}
+  \item data members.
+        \begin{itemize}
+          \item non-static data members, including bit fields.
+          \item static data members.
+
+        \end{itemize}
+  \item member functions
+        \begin{itemize}
+          \item non-static member functions
+          \item static member functions
+        \end{itemize}
+  \item nested types
+        \begin{itemize}
+          \item nested classes and enumerations defined within the class definition.
+                % TODO :: Test out if the nested class is constructed alongside parent class.
+          \item aliases of existing types, defined with typedef or type alias declarations.
+          \item the name of the class within its own definition acts as a publci member type alias of itself for the purpose of lookup.
+                Except when the used to name a constructor.
+                This is known as injected-class-name.
+          \item enumerators from all unscope enumerations defined within the class.
+          \item member templates, class templates or function templates body of any non-local class/struct/union.
+                Additionally variable templates since C++14.
+        \end{itemize}
+\end{itemize}
+
+All members are defined at once in the class.
+They cannot be added to an already-defined body of an already defined class.
+
+This is unlike members of namespaces.
+Which is to say,
+
+\lstinputlisting[
+  language=c++,
+  frame=single,
+  caption={
+      This is allowed.
+    }]
+{./.source_codes/classes/can_declare_additional_members/allowed.txt}
+
+\lstinputlisting[
+  language=c++,
+  frame=single,
+  caption={
+      And this is not allowed.
+    }]
+{./.source_codes/classes/can_declare_additional_members/not_allowed.txt}
+
+% TODO :: What is this last point about? I don't get it...
+
+Additionally, a member of a class T cannot use T as its name if the member is:
+
+\begin{itemize}
+  \item a static data member,
+  \item a member function,
+  \item a member type,
+  \item a member template,
+  \item an enumerator of an unscoped enumeration,
+  \item a member of a member anonymous union.
+\end{itemize}
+
+However, a non-static data member may use the name T as long as there are no user-declared constructors.
+
+For example, consider the 2 listings below.
+
+\lstinputlisting[
+  language=c++,
+  frame=single,
+  caption={
+      This code compiles.
+    }]
+{./.source_codes/classes/allowed_member_names/compiles.txt}
+
+\lstinputlisting[
+  language=c++,
+  frame=single,
+  caption={
+      This does not compile.
+    }]
+{./.source_codes/classes/allowed_member_names/doesnt_compile.txt}
+
+A class with at least one declared or inherited pure virtual member function is an abstract class.
+Objects of this type cannot be created.
+
+A class with a constexpr constructor is a LiteralType.
+Objects of this type can be manipulated by constexpr functions at compile time.
+
+Some member functions are special.
+Under certain circumstances, they will be defined by the compiler implicitly.
+They are:
+
+\begin{itemize}
+  \item Default constructor
+  \item Copy constructor
+  \item Move constructor
+  \item Copy assignment operator
+  \item Move assignment operator
+  \item Destructor
+\end{itemize}
+
+\newpage
+\section{Appendices}
+\subsection{Templates}
+\subsubsection{Variable Templates}
+\label{appendix:templates:variable_template}
+
+A variable template defines a family of variables or static data members.
+
+\lstinputlisting[
+  language=c++,
+  frame=single,
+  caption={
+      An example of a variable template.
+    }]
+{./.source_codes/appendix_variable_template.txt}
+
+\subsection{Uniform Initialization}
+
+Papers on \verb|uniform initialization|
+
+\begin{itemize}
+  \item \href{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2477.pdf}{N2477}
+        % TODO :: Summary
+  \item \href{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2532.pdf}{N2532}
+        % TODO :: Summary
+  \item \href{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3526.html}{N3526}
+        % TODO :: Summary
+\end{itemize}
 \end{document}

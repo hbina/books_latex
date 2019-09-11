@@ -1,0 +1,4 @@
+inline double fd() { return 1.0; }
+extern double d1;
+double d2 = d1;
+double d1 = fd();

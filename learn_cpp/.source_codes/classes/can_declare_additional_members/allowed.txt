@@ -1,0 +1,9 @@
+namespace hbina
+{
+int a;
+};
+
+namespace hbina
+{
+int b;
+};
