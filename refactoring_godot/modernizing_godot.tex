@@ -1,0 +1,50 @@
+\documentclass[a4paper,10pt]{book}
+\usepackage[utf8]{inputenc}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+\usepackage{listings}
+\usepackage{hyperref}
+
+\title{Modernizing Godot}
+\author{Hanif Bin Ariffin}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\section{Introduction}
+
+This book will lay out what I am thinking when refactoring Godot to modernize it.
+It will also function as a working diary for me.
+
+\section{Updating the build script}
+
+We will be using C++17 for this project.
+To enable this, we have to modify the build script used, Scons.
+Simply adding the switch should be sufficient.
+
+\section{Constexpr math function}
+
+This should be trivial enough to implement.
+
+TODO :: gcem still does not support constexpr floating point modulo operation
+
+\section{Replacing Macros with Templates}
+
+Macros are ugly and hard to debug.
+
+\section{Using Enum Classes Instead of Basic Enums}
+
+Reduce type misinterpretations.
+
+\section{Use Variadic Templates}
+
+vformat is like printf but it only accepts a number of Variant as parameters.
+This function can easily be transformed into a variadic templates that accepts a bunch of Variants.
+This will increase compile time due to the fact that multiple copies have to be made.
+The upside is that the runtime cost is reduced due to the fact that there are no branching necessary for checking.
+
+\section{Rework Variant}
+
+
+\end{document}
