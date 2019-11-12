@@ -4,14 +4,12 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "tectonic build",
+            "label": "build text",
             "type": "shell",
             "command": "tectonic",
             "args": [
-                "opengl_redbook.tex",
-                "--keep-intermediates",
-                "--print",
-                "--keep-logs"
+                "a_dream_i_had.tex",
+                "--keep-intermediates"
             ],
             "group": {
                 "kind": "build",
